@@ -1,0 +1,44 @@
+<html>
+<head>
+<title>rpg</title>
+</head>
+<body>
+<script type="text/javascript" src="js/jquery.js"></script> 
+<script type="text/javascript" src="js/MapView.js"></script>
+<script type="text/javascript" src="js/MapModel.js"></script>
+<script type="text/javascript" src="js/KeyWatcher.js"></script>
+<script type="text/javascript">
+
+var keyb = new KeyWatcher();
+var model = new MapModel();
+var map = new MapView(10, 10, 0, 640,480, model);
+
+map.setHasBorder(true);
+document.body.appendChild(map.getDiv());
+
+var hero = model.createCharacter();
+//var hh = model.createCharacter();
+
+setInterval(function()
+{
+	if (keyb.getKeys()["Left"])
+	{
+		model.moveCharacter(hero, 1);
+	}
+	if (keyb.getKeys()["Right"])
+	{
+		model.moveCharacter(hero, 2);
+	}
+	if (keyb.getKeys()["Up"])
+	{
+		model.moveCharacter(hero, 3);
+	}
+	if (keyb.getKeys()["Down"])
+	{
+		model.moveCharacter(hero, 0);
+	}
+}, 1)
+
+</script>
+</body>
+</html>
