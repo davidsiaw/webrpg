@@ -25,7 +25,7 @@ function MapModel()
 	var animOffset = 0;
 	var characters = [];
 	
-	function moveChar(char, direction)
+	function setCharMovement(char, direction)
 	{
 		var step = 1/8;
 		if(direction == 0)
@@ -53,6 +53,10 @@ function MapModel()
 		for (var idx in characters)
 		{
 			var char = characters[idx];
+			if (char && !(char.dx || char.dy))
+			{
+				char.offsetx = 0;
+			}
 			if (char && (char.dx || char.dy))
 			{
 				char.offsetx = 0 + Math.floor(animOffset / 8) * 32;
@@ -66,10 +70,6 @@ function MapModel()
 				{
 					char.dy = 0;
 				}
-			}
-			if (char && !(char.dx || char.dy))
-			{
-				char.offsetx = 0;
 			}
 		}
 		return characters;
@@ -105,8 +105,13 @@ function MapModel()
 		self.rotateCharacter(number, direction);
 		if (char)
 		{
-			moveChar(char, direction);
+			setCharMovement(char, direction);
 		}
+	}
+	
+	this.getCharacter = function(number)
+	{
+		return characters[number];
 	}
 	
 	return this;

@@ -4,6 +4,7 @@
 </head>
 <body>
 <script type="text/javascript" src="js/jquery.js"></script> 
+<script type="text/javascript" src="js/MapCamera.js"></script>
 <script type="text/javascript" src="js/MapView.js"></script>
 <script type="text/javascript" src="js/MapModel.js"></script>
 <script type="text/javascript" src="js/KeyWatcher.js"></script>
@@ -18,6 +19,9 @@ document.body.appendChild(map.getDiv());
 
 var hero = model.createCharacter();
 //var hh = model.createCharacter();
+
+var camera = new MapHeroCamera(map, model, hero);
+map.setCamera(camera);
 
 setInterval(function()
 {

@@ -1,7 +1,7 @@
 function MapView(x,y,z,w,h,mapModel)
 {
 	var tileSize = mapModel.getTileSize();
-	var tlx = 0, tly = 0;
+	var camera = new MapCamera();
 	
 	var div = document.createElement('div');
 	div.style.width = w+"px";
@@ -31,7 +31,7 @@ function MapView(x,y,z,w,h,mapModel)
 			tile.style.position = "absolute";
 			tile.style.top = (y * tileSize)+"px";
 			tile.style.left = (x * tileSize)+"px";
-			tile.style.zIndex = -100 + y;
+			tile.style.zIndex = z - tilesPerHeight + y - 3;
 			div.appendChild(tile);
 			row.push(tile);
 		}
@@ -40,14 +40,25 @@ function MapView(x,y,z,w,h,mapModel)
 	
 	var currentCharacters = {};
 	
+	this.setCamera = function(cam)
+	{
+		camera = cam;
+	}
+	
 	function update()
 	{
+		var cameraPos = camera.getLocation();
+		
 		for (var y = 0; y < tilesPerHeight; y++)
 		{
 			for (var x = 0; x < tilesPerWidth; x++)
 			{
-				var point = mapModel.getTileOffset(tlx+x,tly+y);
-				rows[y][x].style.background = "url(" + mapModel.getImage() + ") -" + point.x + "px -" + point.y + "px no-repeat"
+				var texcoord = mapModel.getTileOffset(cameraPos.x+x,cameraPos.y+y);
+				var image = mapModel.getImage();
+				rows[y][x].style.background = "url(" +image + ") -" + texcoord.x + "px -" + texcoord.y + "px no-repeat"
+				rows[y][x].style.top = ((y - 1 - (cameraPos.y%1)) * tileSize )+"px";
+				rows[y][x].style.left = ((x - 1 - (cameraPos.x%1)) * tileSize)+"px";
+				rows[y][x].style.zIndex = z - tilesPerHeight + y - 3;
 			}
 		}
 		
@@ -71,9 +82,9 @@ function MapView(x,y,z,w,h,mapModel)
 				"url(" + mapModel.getCharacterImage() + ") -" 
 				+ char.offsetx + "px -" 
 				+ char.offsety + "px no-repeat"
-			cElem.style.left = ((char.tilex+1/2) * tileSize - char.width/2) + "px";
-			cElem.style.top = ((char.tiley+1) * tileSize - char.height) + "px";
-			cElem.style.zIndex = -50 + char.tiley;
+			cElem.style.left = ((char.tilex+1/2) * tileSize - char.width/2 - (cameraPos.x) * tileSize) + "px";
+			cElem.style.top = ((char.tiley+1) * tileSize - char.height - (cameraPos.y) * tileSize) + "px";
+			cElem.style.zIndex = z - tilesPerHeight + char.tiley - Math.floor(cameraPos.y) - 2;
 		}
 	}
 	
@@ -84,6 +95,11 @@ function MapView(x,y,z,w,h,mapModel)
 	img.onload = function()
 	{
 		update();
+	}
+	
+	this.getRectangle = function()
+	{
+		return {w:w, h:h, x:x, y:y};
 	}
 	
 	this.getDiv = function()
