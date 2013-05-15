@@ -19,7 +19,7 @@ function MapHeroCamera(mapView, mapModel, hero)
 		var rect = mapView.getRectangle();
 		var tileSize = mapModel.getTileSize();
 		var char = mapModel.getCharacter(hero);
-		return {x: char.tilex - rect.w / tileSize / 2, y: char.tiley - rect.h / tileSize / 2};
+		return {x: char.x - rect.w / tileSize / 2 + 0.5, y: char.y - rect.h / tileSize / 2 + 0.5};
 	}
 	
 	return this;

@@ -82,9 +82,9 @@ function MapView(x,y,z,w,h,mapModel)
 				"url(" + mapModel.getCharacterImage() + ") -" 
 				+ char.offsetx + "px -" 
 				+ char.offsety + "px no-repeat"
-			cElem.style.left = ((char.tilex+1/2) * tileSize - char.width/2 - (cameraPos.x) * tileSize) + "px";
-			cElem.style.top = ((char.tiley+1) * tileSize - char.height - (cameraPos.y) * tileSize) + "px";
-			cElem.style.zIndex = z - tilesPerHeight + char.tiley - Math.floor(cameraPos.y) - 2;
+			cElem.style.left = ((char.x+1/2) * tileSize - char.width/2 - (cameraPos.x) * tileSize) + "px";
+			cElem.style.top = ((char.y+1) * tileSize - char.height - (cameraPos.y) * tileSize) + "px";
+			cElem.style.zIndex = z - tilesPerHeight + char.y - Math.floor(cameraPos.y) - 1;
 		}
 	}
 	

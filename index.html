@@ -3,46 +3,80 @@
 <title>rpg</title>
 </head>
 <body>
+<input type="button" value="up" id="upbutton" style="position: absolute; left: 700px; top: 20px" />
+<input type="button" value="down" id="downbutton" style="position: absolute; left: 690px; top: 60px"  />
+<input type="button" value="left" id="leftbutton" style="position: absolute; left: 650px; top: 60px"  />
+<input type="button" value="right" id="rightbutton" style="position: absolute; left: 750px; top: 60px"  />
+
 <script type="text/javascript" src="js/jquery.js"></script> 
 <script type="text/javascript" src="js/MapCamera.js"></script>
 <script type="text/javascript" src="js/MapView.js"></script>
 <script type="text/javascript" src="js/MapModel.js"></script>
 <script type="text/javascript" src="js/KeyWatcher.js"></script>
+<script type="text/javascript" src="js/World.js"></script>
 <script type="text/javascript">
 
 var keyb = new KeyWatcher();
-var model = new MapModel();
-var map = new MapView(10, 10, 0, 640,480, model);
+var world = new World();
+var map = new MapView(10, 10, 0, 640,480, world.getModel());
 
 map.setHasBorder(true);
 document.body.appendChild(map.getDiv());
 
-var hero = model.createCharacter();
-//var hh = model.createCharacter();
+var hero = world.addCharacter(0);
+for (var i=0; i<11; i++) {
+	var hh = world.addCharacter(2);
+	world.teleportCharacter(hh, i,5);
+}
+for (var i=0; i<11; i++) {
+	var hh = world.addCharacter(2);
+	world.teleportCharacter(hh, 5,i);
+}
 
-var camera = new MapHeroCamera(map, model, hero);
+var camera = new MapHeroCamera(map, world.getModel(), hero);
 map.setCamera(camera);
 
 setInterval(function()
 {
-	if (keyb.getKeys()["Left"])
+	if (keyb.getKey(LEFT_ARROW_KEY))
 	{
-		model.moveCharacter(hero, 1);
+		world.moveCharacter(hero, 1);
 	}
-	if (keyb.getKeys()["Right"])
+	if (keyb.getKey(RIGHT_ARROW_KEY))
 	{
-		model.moveCharacter(hero, 2);
+		world.moveCharacter(hero, 2);
 	}
-	if (keyb.getKeys()["Up"])
+	if (keyb.getKey(UP_ARROW_KEY))
 	{
-		model.moveCharacter(hero, 3);
+		world.moveCharacter(hero, 3);
 	}
-	if (keyb.getKeys()["Down"])
+	if (keyb.getKey(DOWN_ARROW_KEY))
 	{
-		model.moveCharacter(hero, 0);
+		world.moveCharacter(hero, 0);
 	}
-}, 1)
+}, 10)
+
+function keydown(key) {
+	keyb.setKeyDown(key);
+}
+
+function keyup(key) {
+	keyb.setKeyUp(key);
+}
+
+document.getElementById("upbutton").addEventListener("touchstart", function() {keydown(UP_ARROW_KEY)}, false );
+document.getElementById("upbutton").addEventListener("touchend", function() {keyup(UP_ARROW_KEY)}, false );
+
+document.getElementById("downbutton").addEventListener("touchstart", function() {keydown(DOWN_ARROW_KEY)}, false );
+document.getElementById("downbutton").addEventListener("touchend", function() {keyup(DOWN_ARROW_KEY)}, false );
+
+document.getElementById("leftbutton").addEventListener("touchstart", function() {keydown(LEFT_ARROW_KEY)}, false );
+document.getElementById("leftbutton").addEventListener("touchend", function() {keyup(LEFT_ARROW_KEY)}, false );
+
+document.getElementById("rightbutton").addEventListener("touchstart", function() {keydown(RIGHT_ARROW_KEY)}, false );
+document.getElementById("rightbutton").addEventListener("touchend", function() {keyup(RIGHT_ARROW_KEY)}, false );
 
 </script>
+
 </body>
 </html>
