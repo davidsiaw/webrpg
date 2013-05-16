@@ -32,7 +32,7 @@ function World(w,h) {
         }
         
         function moveTo(c, x, y) {
-            console.log(x + "," + y)
+            //console.log(x + "," + y)
             var theChar = model.getCharacter(c);
             setOccupant(undefined,theChar.tilex,theChar.tiley)
             setOccupant(c, x, y);
@@ -46,9 +46,9 @@ function World(w,h) {
 	    return model;
 	}
         
-        this.addCharacter = function(type)
+        this.addCharacter = function(type,x,y)
         {
-            var char = model.addCharacter(type);
+            var char = model.addCharacter(type,x,y);
             var c = model.getCharacter(char);
             setOccupant(char, c.tilex, c.tiley); 
             return char;
@@ -58,6 +58,8 @@ function World(w,h) {
         {
             model.moveCharacter(number, direction);
         }
+        
+        
         
         this.teleportCharacter = function(number, x, y)
         {

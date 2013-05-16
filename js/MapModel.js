@@ -8,7 +8,7 @@ function MapModel()
 	
 	this.getImage = function()
 	{
-		return "res/tileset.png"
+		return "res/tilesetsml.png"
 	}
 	
 	this.getTileOffset = function(char, x,y)
@@ -105,17 +105,17 @@ function MapModel()
 		return characters;
 	}
 	
-	this.addCharacter = function(typeid)
+	this.addCharacter = function(typeid,x,y)
 	{
 		characters.push(
 			{
 				id: characters.length,
 				width: 32,
 				height: 48,
-				tilex: 2,
-				tiley: 3,
-				x: 2,
-				y: 3,
+				tilex: x,
+				tiley: y,
+				x: x,
+				y: y,
 				offsetx: 0,
 				offsety: 0,
 				baseoffsetx: typeid * 128,

@@ -3,14 +3,19 @@
 <title>rpg</title>
 </head>
 <body>
-<input type="button" value="up" id="upbutton" style="position: absolute; left: 700px; top: 20px" />
-<input type="button" value="down" id="downbutton" style="position: absolute; left: 690px; top: 60px"  />
-<input type="button" value="left" id="leftbutton" style="position: absolute; left: 650px; top: 60px"  />
-<input type="button" value="right" id="rightbutton" style="position: absolute; left: 750px; top: 60px"  />
+	
+<!--
+<input type="button" value="up" id="upbutton" style="position: absolute; left: 780px; top: 20px; width:100px; height:100px" />
+<input type="button" value="down" id="downbutton" style="position: absolute; left: 780px; top: 160px; width:100px; height:100px"  />
+<input type="button" value="left" id="leftbutton" style="position: absolute; left: 680px; top: 90px; width:100px; height:100px"  />
+<input type="button" value="right" id="rightbutton" style="position: absolute; left: 880px; top: 90px; width:100px; height:100px"  />
+-->
 
-<script type="text/javascript" src="js/jquery.js"></script> 
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/gamepad.js"></script>
 <script type="text/javascript" src="js/MapCamera.js"></script>
 <script type="text/javascript" src="js/MapView.js"></script>
+<script type="text/javascript" src="js/CanvasMapView.js"></script>
 <script type="text/javascript" src="js/MapModel.js"></script>
 <script type="text/javascript" src="js/KeyWatcher.js"></script>
 <script type="text/javascript" src="js/World.js"></script>
@@ -18,26 +23,29 @@
 
 var keyb = new KeyWatcher();
 var world = new World();
-var map = new MapView(10, 10, 0, 640,480, world.getModel());
+var map = new CanvasMapView(10, 10, 0, 640,480, world.getModel());
 
 map.setHasBorder(true);
 document.body.appendChild(map.getDiv());
 
-var hero = world.addCharacter(0);
-for (var i=0; i<11; i++) {
-	var hh = world.addCharacter(2);
-	world.teleportCharacter(hh, i,5);
+var hero = world.addCharacter(0,0,0);
+for (var i=0; i<11; i++)
+{
+	var hh = world.addCharacter(2,i,5);
 }
-for (var i=0; i<11; i++) {
-	var hh = world.addCharacter(2);
-	world.teleportCharacter(hh, 5,i);
+for (var i=0; i<11; i++)
+{
+	var hh = world.addCharacter(2,5,i);
 }
+
+var someone = world.addCharacter(4,2,2);
 
 var camera = new MapHeroCamera(map, world.getModel(), hero);
 map.setCamera(camera);
 
 setInterval(function()
 {
+	
 	if (keyb.getKey(LEFT_ARROW_KEY))
 	{
 		world.moveCharacter(hero, 1);
@@ -54,7 +62,8 @@ setInterval(function()
 	{
 		world.moveCharacter(hero, 0);
 	}
-}, 10)
+	
+}, 1)
 
 function keydown(key) {
 	keyb.setKeyDown(key);
@@ -63,18 +72,24 @@ function keydown(key) {
 function keyup(key) {
 	keyb.setKeyUp(key);
 }
-
+/*
 document.getElementById("upbutton").addEventListener("touchstart", function() {keydown(UP_ARROW_KEY)}, false );
 document.getElementById("upbutton").addEventListener("touchend", function() {keyup(UP_ARROW_KEY)}, false );
+document.getElementById("upbutton").addEventListener("touchleave", function() {keyup(UP_ARROW_KEY)}, false );
 
 document.getElementById("downbutton").addEventListener("touchstart", function() {keydown(DOWN_ARROW_KEY)}, false );
 document.getElementById("downbutton").addEventListener("touchend", function() {keyup(DOWN_ARROW_KEY)}, false );
+document.getElementById("downbutton").addEventListener("touchleave", function() {keyup(DOWN_ARROW_KEY)}, false );
 
 document.getElementById("leftbutton").addEventListener("touchstart", function() {keydown(LEFT_ARROW_KEY)}, false );
 document.getElementById("leftbutton").addEventListener("touchend", function() {keyup(LEFT_ARROW_KEY)}, false );
+document.getElementById("leftbutton").addEventListener("touchleave", function() {keyup(LEFT_ARROW_KEY)}, false );
 
 document.getElementById("rightbutton").addEventListener("touchstart", function() {keydown(RIGHT_ARROW_KEY)}, false );
 document.getElementById("rightbutton").addEventListener("touchend", function() {keyup(RIGHT_ARROW_KEY)}, false );
+document.getElementById("rightbutton").addEventListener("touchleave", function() {keyup(RIGHT_ARROW_KEY)}, false );
+*/
+
 
 </script>
 
