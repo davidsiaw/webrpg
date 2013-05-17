@@ -4,15 +4,16 @@
 </head>
 <body>
 	
-<!--
+
 <input type="button" value="up" id="upbutton" style="position: absolute; left: 780px; top: 20px; width:100px; height:100px" />
 <input type="button" value="down" id="downbutton" style="position: absolute; left: 780px; top: 160px; width:100px; height:100px"  />
 <input type="button" value="left" id="leftbutton" style="position: absolute; left: 680px; top: 90px; width:100px; height:100px"  />
 <input type="button" value="right" id="rightbutton" style="position: absolute; left: 880px; top: 90px; width:100px; height:100px"  />
--->
+
 
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/gamepad.js"></script>
+<script type="text/javascript" src="js/Update.js"></script>
 <script type="text/javascript" src="js/MapCamera.js"></script>
 <script type="text/javascript" src="js/MapView.js"></script>
 <script type="text/javascript" src="js/CanvasMapView.js"></script>
@@ -43,7 +44,7 @@ var someone = world.addCharacter(4,2,2);
 var camera = new MapHeroCamera(map, world.getModel(), hero);
 map.setCamera(camera);
 
-setInterval(function()
+BeginUpdating(function()
 {
 	
 	if (keyb.getKey(LEFT_ARROW_KEY))
@@ -63,7 +64,7 @@ setInterval(function()
 		world.moveCharacter(hero, 0);
 	}
 	
-}, 1)
+}, null)
 
 function keydown(key) {
 	keyb.setKeyDown(key);
@@ -72,7 +73,7 @@ function keydown(key) {
 function keyup(key) {
 	keyb.setKeyUp(key);
 }
-/*
+
 document.getElementById("upbutton").addEventListener("touchstart", function() {keydown(UP_ARROW_KEY)}, false );
 document.getElementById("upbutton").addEventListener("touchend", function() {keyup(UP_ARROW_KEY)}, false );
 document.getElementById("upbutton").addEventListener("touchleave", function() {keyup(UP_ARROW_KEY)}, false );
@@ -88,7 +89,7 @@ document.getElementById("leftbutton").addEventListener("touchleave", function() 
 document.getElementById("rightbutton").addEventListener("touchstart", function() {keydown(RIGHT_ARROW_KEY)}, false );
 document.getElementById("rightbutton").addEventListener("touchend", function() {keyup(RIGHT_ARROW_KEY)}, false );
 document.getElementById("rightbutton").addEventListener("touchleave", function() {keyup(RIGHT_ARROW_KEY)}, false );
-*/
+
 
 
 </script>

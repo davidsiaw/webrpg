@@ -1,6 +1,11 @@
 function MapModel()
 {
+	// constants
 	var self = this;
+	
+	var animSlowness = 16;
+
+	// func
 	this.getTileSize = function()
 	{
 		return 32;
@@ -47,15 +52,15 @@ function MapModel()
 	
 	function setCharMovement(char, direction)
 	{
-		var step = 1/8;
+		var movementStep = 1 / char.slowness;
 		var dir = getDirection(direction);
 		if(dir.dy)
 		{
-			char.dy = dir.dy * step;
+			char.dy = dir.dy * movementStep;
 		}
 		if(dir.dx)
 		{
-			char.dx = dir.dx * step;
+			char.dx = dir.dx * movementStep;
 		}
 	}
 	
@@ -74,10 +79,12 @@ function MapModel()
 		moveTo = func;
 	}
 	
-	this.getCharacters = function()
+	this.advanceTime = function(milSecAdvanced)
 	{
-		animOffset++;
-		animOffset %= 32;
+		var framesAdvanced = Math.round(milSecAdvanced / 8);
+		animOffset += framesAdvanced;
+		animOffset %= animSlowness * 4;
+		
 		for (var idx in characters)
 		{
 			var char = characters[idx];
@@ -87,22 +94,55 @@ function MapModel()
 			}
 			if (char && (char.dx || char.dy))
 			{
-				char.offsetx = char.baseoffsetx + Math.floor(animOffset / 8) * 32;
+				char.offsetx = char.baseoffsetx + Math.floor(animOffset / animSlowness) * char.width;
 				
-				char.x += char.dx;
-				if (char.x === Math.floor(char.x))
-				{
-					char.dx = 0;
+				// move forward number of frames
+				for (var i = 0; i < framesAdvanced; i++) {
+					
+					var resultingx = char.x + char.dx;
+					var resultingy = char.y + char.dy;
+					if (resultingx === Math.floor(resultingx))
+					{
+						char.x = resultingx;
+						char.dx = 0;
+					}
+					else
+					{
+						char.x = resultingx;
+					}
+					if (Math.abs(char.x - char.tilex) >= 1)
+					{
+						char.x = char.tilex;
+						char.dx = 0;
+					}
+						
+					char.y = resultingy;
+					if (resultingy === Math.floor(resultingy))
+					{
+						char.y = resultingy;
+						char.dy = 0;
+					}
+					else
+					{
+						char.y = resultingy;
+					}
+					
+					if (Math.abs(char.y - char.tiley) >= 1)
+					{
+						char.y = char.tiley;
+						char.dy = 0;
+					}
 				}
 				
-				char.y += char.dy;
-				if (char.y === Math.floor(char.y))
-				{
-					char.dy = 0;
-				}
+				
 			}
 		}
+	}
+
+	this.getCharacters = function()
+	{
 		return characters;
+	
 	}
 	
 	this.addCharacter = function(typeid,x,y)
@@ -121,7 +161,8 @@ function MapModel()
 				baseoffsetx: typeid * 128,
 				dx: 0,
 				dy: 0,
-				direction: 0
+				direction: 0,
+				slowness: 16
 			}
 		);
 		return characters.length - 1;
@@ -139,34 +180,40 @@ function MapModel()
 		self.rotateCharacter(number, direction);
 		
 		var dir = getDirection(direction);
+		var dx = dir.dx;
+		var dy = dir.dy;
+		
+		
 		if (char)
 		{
-			if (!char.dx && dir.dx && char.tilex == char.x)
+			if (!char.dx && dx && char.tilex == char.x)
 			{
 				//console.log("moveright")
-				if (canMoveTo(number, char.tilex+dir.dx, char.tiley))
+				if (canMoveTo(number, char.tilex+dx, char.tiley))
 				{
-					moveTo(number, char.tilex+dir.dx, char.tiley);
-					char.tilex += dir.dx;
+					moveTo(number, char.tilex+dx, char.tiley);
+					char.tilex += dx;
 					setCharMovement(char, direction);
 				}
 				else
 				{
+					//console.log("collide");
 					return;
 				}
 			}
 			
-			if (!char.dy && dir.dy && char.tiley == char.y)
+			if (!char.dy && dy && char.tiley == char.y)
 			{
 				//console.log("movedown")
-				if (canMoveTo(number, char.tilex, char.tiley+dir.dy))
+				if (canMoveTo(number, char.tilex, char.tiley+dy))
 				{
-					moveTo(number, char.tilex, char.tiley+dir.dy);
-					char.tiley += dir.dy;
+					moveTo(number, char.tilex, char.tiley+dy);
+					char.tiley += dy;
 					setCharMovement(char, direction);
 				}
 				else
 				{
+					//console.log("collide");
 					return;
 				}
 			}

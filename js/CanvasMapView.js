@@ -25,8 +25,14 @@ function CanvasMapView(x,y,z,w,h,mapModel)
         camera = cam;
     }
     
+    var lastUpdateTime = new Date();
+	
     function update()
     {
+	var timeBetween = new Date() - lastUpdateTime;
+        //console.log(timeBetween);
+        mapModel.advanceTime(timeBetween);
+        
         var cameraPos = camera.getLocation();
         
         for (var y = 0; y < tilesPerHeight; y++)
@@ -55,6 +61,8 @@ function CanvasMapView(x,y,z,w,h,mapModel)
             
             context.drawImage(charSetImg,char.offsetx,char.offsety,char.width,char.height,left,top,char.width,char.height);
         }
+        
+        lastUpdateTime = new Date();
     }
     
     tileSetImg.src = mapModel.getImage();
@@ -63,27 +71,7 @@ function CanvasMapView(x,y,z,w,h,mapModel)
         charSetImg.src = mapModel.getCharacterImage();
         charSetImg.onload = function()
         {
-            var animFrame = window.requestAnimationFrame ||
-                            window.webkitRequestAnimationFrame ||
-                            window.mozRequestAnimationFrame    ||
-                            window.oRequestAnimationFrame      ||
-                            window.msRequestAnimationFrame     ||
-            null;
-        
-            if ( animFrame !== null ) {
-        
-                var recursiveAnim = function() {
-                    update();
-                    animFrame( recursiveAnim, canvas );
-                };
-    
-                // start the mainloop
-                animFrame( recursiveAnim, canvas );
-                
-            } else {
-                var ONE_FRAME_TIME = 1000.0 / 60.0 ;
-                setInterval( update, ONE_FRAME_TIME );
-            }
+            BeginUpdating(update, canvas);
         }
     }
     
