@@ -41,6 +41,11 @@ for (var i=0; i<11; i++)
 
 var someone = world.addCharacter(4,2,2);
 
+world.setOnCollide(function(predator, victim)
+{
+	console.log(predator + " hits " + victim)
+});
+
 var camera = new MapHeroCamera(map, world.getModel(), hero);
 map.setCamera(camera);
 

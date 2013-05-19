@@ -28,6 +28,12 @@ function MapModel()
 	
 	var animOffset = 0;
 	var characters = [];
+	var collide = function(predator, victim) { }
+	var canMoveTo = function (c,x,y) { return true; }
+	var moveTo = function (c,x,y) { return true; }
+	var getOccupant = function (x,y) { return undefined; }
+	
+	
 	
 	function getDirection(direction) {
 		var dir = {dx:0, dy:0};
@@ -66,9 +72,6 @@ function MapModel()
 	
 	function sign(x) { return x > 0 ? 1 : x < 0 ? -1 : 0; }
 	
-	var canMoveTo = function (c,x,y) { return true; }
-	var moveTo = function (c,x,y) { return true; }
-	
 	this.setCanMoveToFunc = function(func)
 	{
 		canMoveTo = func;
@@ -77,6 +80,16 @@ function MapModel()
 	this.setMoveToFunc = function(func)
 	{
 		moveTo = func;
+	}
+	
+	this.setGetOccupant = function (func)
+	{
+		getOccupant = func;
+	}
+	
+	this.setOnCollide = function(func)
+	{
+		collide = func;
 	}
 	
 	this.advanceTime = function(milSecAdvanced)
@@ -197,6 +210,7 @@ function MapModel()
 				}
 				else
 				{
+					collide(number, getOccupant(char.tilex+dx, char.tiley));
 					//console.log("collide");
 					return;
 				}
@@ -213,6 +227,7 @@ function MapModel()
 				}
 				else
 				{
+					collide(number, getOccupant(char.tilex, char.tiley+dy));
 					//console.log("collide");
 					return;
 				}

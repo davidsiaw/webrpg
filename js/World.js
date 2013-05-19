@@ -40,6 +40,7 @@ function World(w,h) {
         
         model.setCanMoveToFunc(canMoveTo);
         model.setMoveToFunc(moveTo);
+	model.setGetOccupant(getOccupant);
         
 	this.getModel = function()
 	{
@@ -59,12 +60,15 @@ function World(w,h) {
             model.moveCharacter(number, direction);
         }
         
-        
-        
         this.teleportCharacter = function(number, x, y)
         {
             model.teleportCharacter(number, x, y);
         }
+	
+	this.setOnCollide = function(func)
+	{
+		model.setOnCollide(func);
+	}
 	
 	return this;
 }
