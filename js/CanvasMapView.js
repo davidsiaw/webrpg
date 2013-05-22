@@ -1,5 +1,6 @@
 function CanvasMapView(x,y,z,w,h,mapModel)
 {
+    var self = this;
     var tileSize = mapModel.getTileSize();
     var camera = new MapCamera();
     
@@ -71,7 +72,7 @@ function CanvasMapView(x,y,z,w,h,mapModel)
         charSetImg.src = mapModel.getCharacterImage();
         charSetImg.onload = function()
         {
-            BeginUpdating(update, canvas);
+	    self.update();
         }
     }
     
@@ -83,6 +84,11 @@ function CanvasMapView(x,y,z,w,h,mapModel)
     this.getDiv = function()
     {
         return canvas;
+    }
+    
+    this.update = function()
+    {
+	update();
     }
     
     this.setHasBorder = function(yes)

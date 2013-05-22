@@ -33,8 +33,6 @@ function MapModel()
 	var moveTo = function (c,x,y) { return true; }
 	var getOccupant = function (x,y) { return undefined; }
 	
-	
-	
 	function getDirection(direction) {
 		var dir = {dx:0, dy:0};
 		if(direction == 0)
@@ -146,8 +144,6 @@ function MapModel()
 						char.dy = 0;
 					}
 				}
-				
-				
 			}
 		}
 	}
@@ -249,12 +245,13 @@ function MapModel()
 		return 1;
 	}
 	
-	this.getFrontTile = function (number)
+	this.getFrontTile = function (number, distance)
 	{
+		var dist = distance || 1;
 		var char = characters[number];
 		var dir = getDirection(char.direction);
-		return {x: dir.dx + char.tilex,
-			y: dir.dy + char.tiley}
+		return {x: dir.dx * dist + char.tilex,
+			y: dir.dy * dist + char.tiley}
 	}
 	
 	this.getCharacter = function(number)

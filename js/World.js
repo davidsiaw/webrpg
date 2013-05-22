@@ -70,5 +70,20 @@ function World(w,h) {
 		model.setOnCollide(func);
 	}
 	
+	this.getCharacterInFrontOf = function(number, distance)
+	{
+		var tile = model.getFrontTile(number, distance);
+		return getOccupant(tile.x, tile.y);
+	}
+	
+	this.getClosestCharacterInFrontOf = function(number, distance)
+	{
+		var tile
+		while (!tile) {
+			tile = model.getFrontTile(number, distance);
+		}
+		return getOccupant(tile.x, tile.y);
+	}
+	
 	return this;
 }

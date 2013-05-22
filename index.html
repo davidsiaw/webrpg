@@ -3,13 +3,11 @@
 <title>rpg</title>
 </head>
 <body>
-	
 
 <input type="button" value="up" id="upbutton" style="position: absolute; left: 780px; top: 20px; width:100px; height:100px" />
 <input type="button" value="down" id="downbutton" style="position: absolute; left: 780px; top: 160px; width:100px; height:100px"  />
 <input type="button" value="left" id="leftbutton" style="position: absolute; left: 680px; top: 90px; width:100px; height:100px"  />
 <input type="button" value="right" id="rightbutton" style="position: absolute; left: 880px; top: 90px; width:100px; height:100px"  />
-
 
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/gamepad.js"></script>
@@ -19,6 +17,7 @@
 <script type="text/javascript" src="js/CanvasMapView.js"></script>
 <script type="text/javascript" src="js/MapModel.js"></script>
 <script type="text/javascript" src="js/KeyWatcher.js"></script>
+<script type="text/javascript" src="js/DialogView.js"></script>
 <script type="text/javascript" src="js/World.js"></script>
 <script type="text/javascript">
 
@@ -26,24 +25,30 @@ var keyb = new KeyWatcher();
 var world = new World();
 var map = new CanvasMapView(10, 10, 0, 640,480, world.getModel());
 
-map.setHasBorder(true);
+//map.setHasBorder(true);
 document.body.appendChild(map.getDiv());
 
 var hero = world.addCharacter(0,0,0);
+
 for (var i=0; i<11; i++)
 {
 	var hh = world.addCharacter(2,i,5);
 }
+
 for (var i=0; i<11; i++)
 {
 	var hh = world.addCharacter(2,5,i);
 }
 
-var someone = world.addCharacter(4,2,2);
+var someone = world.addCharacter(1,2,2);
+
+var dialog = new DialogView(10,10,1,640,480,"res/midJQ.png");
+document.body.appendChild(dialog.getDiv());
+
 
 world.setOnCollide(function(predator, victim)
 {
-	console.log(predator + " hits " + victim)
+	
 });
 
 var camera = new MapHeroCamera(map, world.getModel(), hero);
@@ -51,6 +56,7 @@ map.setCamera(camera);
 
 BeginUpdating(function()
 {
+	map.update();
 	
 	if (keyb.getKey(LEFT_ARROW_KEY))
 	{
@@ -67,6 +73,30 @@ BeginUpdating(function()
 	if (keyb.getKey(DOWN_ARROW_KEY))
 	{
 		world.moveCharacter(hero, 0);
+	}
+	if (keyb.getKey(A_KEY)) {
+		var char = world.getCharacterInFrontOf(hero);
+		if (char) {
+			console.log("A to " + char);
+		}
+	}
+	if (keyb.getKey(S_KEY)) {
+		var char = world.getCharacterInFrontOf(hero);
+		if (char) {
+			console.log("S to " + char);
+		}
+	}
+	if (keyb.getKey(Z_KEY)) {
+		var char = world.getCharacterInFrontOf(hero);
+		if (char) {
+			console.log("Z to " + char);
+		}
+	}
+	if (keyb.getKey(X_KEY)) {
+		var char = world.getCharacterInFrontOf(hero);
+		if (char) {
+			console.log("X to " + char);
+		}
 	}
 	
 }, null)
