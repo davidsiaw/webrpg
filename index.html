@@ -55,42 +55,44 @@ Number.prototype.clamp = function(min, max) {
 var camera = new MapHeroCamera(map, world.getModel(), hero);
 map.setCamera(camera);
 
+//dialog.setText("Haruhi", "Nagato")
 dialog.hide();
 
 var currow = 0;
 var curcol = 0;
-dialog.setHighlightBox(dialog.areaGetSquare(curcol, currow));
+//dialog.setHighlightBox(dialog.areaGetRow(currow, currow));
 var dialogActions =
 {
 	zActionOnce: function()
 	{
 		input.setActions(walkAroundActions);
+		dialog.hideNextArrow();
 		dialog.hide();
-	},
+	}/*,
 	upActionMatic: function()
 	{
 		currow--;
 		currow = currow.clamp(0,1)
-		dialog.setHighlightBox(dialog.areaGetSquare(curcol, currow));
+		dialog.setHighlightBox(dialog.areaGetRow(currow, currow));
 	},
 	downActionMatic: function()
 	{
 		currow++;
 		currow = currow.clamp(0,1)
-		dialog.setHighlightBox(dialog.areaGetSquare(curcol, currow));
+		dialog.setHighlightBox(dialog.areaGetRow(currow, currow));
 	},
 	leftActionMatic: function()
 	{
 		curcol--;
 		curcol = curcol.clamp(0,17)
-		dialog.setHighlightBox(dialog.areaGetSquare(curcol, currow));
+		dialog.setHighlightBox(dialog.areaGetRow(currow, currow));
 	},
 	rightActionMatic: function()
 	{
 		curcol++;
 		curcol = curcol.clamp(0,17)
-		dialog.setHighlightBox(dialog.areaGetSquare(curcol, currow));
-	}
+		dialog.setHighlightBox(dialog.areaGetRow(currow, currow));
+	}*/
 }
 
 var walkAroundActions =
@@ -103,8 +105,13 @@ var walkAroundActions =
 	{
 		var char = world.getCharacterInFrontOf(hero);
 		if (char) {
-			input.setActions(dialogActions);
+			input.setActions({});
 			dialog.show();
+			dialog.startWritingText(["[Character " + char + "]", "this is my life", "its now or never", "I ain't gonna live forever"], function()
+			{
+				dialog.showNextArrow();
+				input.setActions(dialogActions);
+			});
 			//console.log("meow");
 		}
 	}

@@ -16,9 +16,16 @@ function DialogView(x,y,z,w,h,windowSkin)
     var highlightboxOpacity = 0.5;
     var highlightboxOpacityChange = 1/64;
     
+    var arrowAnim = 0;
+    var arrowAnimStep = 1/4;
+    
+    var text = [];
+    
+    var showNextArrow = false;
+    
     //console.log(cc)
     
-    var tx=4,ty=480-100,tw=632,th=96;
+    var tx=4,ty=480-164,tw=632,th=160;
     var highlightbox = {
 	    x: 0,
 	    y: 0,
@@ -77,31 +84,43 @@ function DialogView(x,y,z,w,h,windowSkin)
 		ctx.drawImage(image, 128-16, 16, 16, 32, tx+tw-16, ty+yy, 16, 32);
 	}
 	
-	if (highlightbox.w == 0 || highlightbox.h == 0) {
-	    return;
+	if (!highlightbox.w == 0 && !highlightbox.h == 0) {
+	    var origAlpha = ctx.globalAlpha;
+	    highlightboxOpacity += highlightboxOpacityChange;
+	    ctx.globalAlpha = highlightboxOpacity;
+	    if (highlightboxOpacity >= 1 || highlightboxOpacity <= 0.5) {
+		highlightboxOpacityChange = -highlightboxOpacityChange;
+	    }
+	    
+	    ctx.drawImage(image, 64, 64, 16, 16, highlightbox.x, highlightbox.y, 16, 16);
+	    ctx.drawImage(image, 64+16, 64, 16, 16, highlightbox.x+highlightbox.w-16, highlightbox.y, 16, 16);
+	    ctx.drawImage(image, 64, 64+16, 16, 16, highlightbox.x, highlightbox.y+highlightbox.h-16, 16, 16);
+	    ctx.drawImage(image, 64+16, 64+16, 16, 16, highlightbox.x+highlightbox.w-16, highlightbox.y+highlightbox.h-16, 16, 16);
+	    
+	    ctx.drawImage(image, 64, 64+8, 16, 16, highlightbox.x, highlightbox.y+16, 16, highlightbox.h-32);
+	    ctx.drawImage(image, 64+8, 64, 16, 16, highlightbox.x+16, highlightbox.y, highlightbox.w-32, 16);
+	    
+	    ctx.drawImage(image, 64+16, 64+8, 16, 16, highlightbox.x+highlightbox.w-16, highlightbox.y+16, 16, highlightbox.h-32);
+	    ctx.drawImage(image, 64+8, 64+16, 16, 16, highlightbox.x+16, highlightbox.y+highlightbox.h-16, highlightbox.w-32, 16);
+	    
+	    ctx.drawImage(image, 64+8, 64+8, 16, 16, highlightbox.x+16, highlightbox.y+16, highlightbox.w-32, highlightbox.h-32);
+	    
+	    ctx.globalAlpha = origAlpha
 	}
 	
-	var origAlpha = ctx.globalAlpha;
-	highlightboxOpacity += highlightboxOpacityChange;
-	ctx.globalAlpha = highlightboxOpacity;
-	if (highlightboxOpacity >= 1 || highlightboxOpacity <= 0.5) {
-	    highlightboxOpacityChange = -highlightboxOpacityChange;
+	ctx.fillStyle = "#fff"
+	ctx.textBaseline = "top"
+	ctx.font = "24px courier"
+	for (var row=0; row < text.length; row++) {
+	    ctx.fillText(text[row], tx+18, ty+18+32*row);	
 	}
 	
-	ctx.drawImage(image, 64, 64, 16, 16, highlightbox.x, highlightbox.y, 16, 16);
-	ctx.drawImage(image, 64+16, 64, 16, 16, highlightbox.x+highlightbox.w-16, highlightbox.y, 16, 16);
-	ctx.drawImage(image, 64, 64+16, 16, 16, highlightbox.x, highlightbox.y+highlightbox.h-16, 16, 16);
-	ctx.drawImage(image, 64+16, 64+16, 16, 16, highlightbox.x+highlightbox.w-16, highlightbox.y+highlightbox.h-16, 16, 16);
-	
-	ctx.drawImage(image, 64, 64+8, 16, 16, highlightbox.x, highlightbox.y+16, 16, highlightbox.h-32);
-	ctx.drawImage(image, 64+8, 64, 16, 16, highlightbox.x+16, highlightbox.y, highlightbox.w-32, 16);
-	
-	ctx.drawImage(image, 64+16, 64+8, 16, 16, highlightbox.x+highlightbox.w-16, highlightbox.y+16, 16, highlightbox.h-32);
-	ctx.drawImage(image, 64+8, 64+16, 16, 16, highlightbox.x+16, highlightbox.y+highlightbox.h-16, highlightbox.w-32, 16);
-	
-	ctx.drawImage(image, 64+8, 64+8, 16, 16, highlightbox.x+16, highlightbox.y+16, highlightbox.w-32, highlightbox.h-32);
-	
-	ctx.globalAlpha = origAlpha;
+	if (showNextArrow) {
+	    arrowAnim+=arrowAnimStep;
+	    arrowAnim %= 4;
+	    var arrowAnimInt = Math.floor(arrowAnim);
+	    ctx.drawImage(image, 96+(arrowAnimInt % 2)*16, 64+(arrowAnimInt >> 1)*16, 16, 16, tx+tw-32, ty+th-32, 16, 16);
+	}
     }
     
     this.hide = function()
@@ -165,6 +184,52 @@ function DialogView(x,y,z,w,h,windowSkin)
 	    w: 32,
 	    h: 32
 	};
+    }
+    
+    this.setText = function()
+    {
+	text = arguments;
+    }
+    
+    this.startWritingText = function(textArray, onComplete)
+    {
+	text = [ ];
+	var row = 0;
+	
+	function t()
+	{
+	    if (text.length === row) {
+		text.push("");
+	    }
+	    
+	    if (text[row].length === textArray[row].length) {
+		row++;
+		text.push("");
+	    }
+	    
+	    if (row === textArray.length) {
+		onComplete();
+		return;
+	    }
+	    
+	    do {
+		text[row] += textArray[row][text[row].length];
+	    } while (textArray[row][text[row].length] == " " && text[row].length < textArray[row].length);
+	    
+	    setTimeout(t, 60);
+	};
+	
+	t();
+    }
+    
+    this.showNextArrow = function()
+    {
+	showNextArrow = true;
+    }
+    
+    this.hideNextArrow = function()
+    {
+	showNextArrow = false;
     }
     
     return this;
