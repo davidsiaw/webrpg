@@ -4,11 +4,6 @@
 </head>
 <body>
 
-<input type="button" value="up" id="upbutton" style="position: absolute; left: 780px; top: 20px; width:100px; height:100px" />
-<input type="button" value="down" id="downbutton" style="position: absolute; left: 780px; top: 160px; width:100px; height:100px"  />
-<input type="button" value="left" id="leftbutton" style="position: absolute; left: 680px; top: 90px; width:100px; height:100px"  />
-<input type="button" value="right" id="rightbutton" style="position: absolute; left: 880px; top: 90px; width:100px; height:100px"  />
-
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/gamepad.js"></script>
 <script type="text/javascript" src="js/Update.js"></script>
@@ -19,13 +14,15 @@
 <script type="text/javascript" src="js/KeyWatcher.js"></script>
 <script type="text/javascript" src="js/DialogView.js"></script>
 <script type="text/javascript" src="js/World.js"></script>
+<script type="text/javascript" src="js/game/SimpleInput.js"></script>
 <script type="text/javascript">
 
-var keyb = new KeyWatcher();
+var input = new SimpleInput();
 var world = new World();
 var map = new CanvasMapView(10, 10, 0, 640,480, world.getModel());
+var dialog = new DialogView(10,10,1,640,480,"res/midJQ.png");
 
-//map.setHasBorder(true);
+document.body.appendChild(dialog.getDiv());
 document.body.appendChild(map.getDiv());
 
 var hero = world.addCharacter(0,0,0);
@@ -42,10 +39,6 @@ for (var i=0; i<11; i++)
 
 var someone = world.addCharacter(1,2,2);
 
-var dialog = new DialogView(10,10,1,640,480,"res/midJQ.png");
-document.body.appendChild(dialog.getDiv());
-
-
 world.setOnCollide(function(predator, victim)
 {
 	
@@ -54,78 +47,43 @@ world.setOnCollide(function(predator, victim)
 var camera = new MapHeroCamera(map, world.getModel(), hero);
 map.setCamera(camera);
 
+dialog.hide();
+
+var dialogActions =
+{
+	zActionOnce: function()
+	{
+		input.setActions(walkAroundActions);
+		dialog.hide();
+	}
+}
+
+var walkAroundActions =
+{
+	leftArrowAction: function() { world.moveCharacter(hero, 1) },
+	rightArrowAction: function() { world.moveCharacter(hero, 2) },
+	upArrowAction: function() { world.moveCharacter(hero, 3) },
+	downArrowAction: function() { world.moveCharacter(hero, 0) },
+	zActionOnce: function()
+	{
+		var char = world.getCharacterInFrontOf(hero);
+		if (char) {
+			input.setActions(dialogActions);
+			dialog.show();
+			//console.log("meow");
+		}
+	}
+};
+
+input.setActions(walkAroundActions);
+
 BeginUpdating(function()
 {
+	input.checkInputs();
+	dialog.update();
 	map.update();
 	
-	if (keyb.getKey(LEFT_ARROW_KEY))
-	{
-		world.moveCharacter(hero, 1);
-	}
-	if (keyb.getKey(RIGHT_ARROW_KEY))
-	{
-		world.moveCharacter(hero, 2);
-	}
-	if (keyb.getKey(UP_ARROW_KEY))
-	{
-		world.moveCharacter(hero, 3);
-	}
-	if (keyb.getKey(DOWN_ARROW_KEY))
-	{
-		world.moveCharacter(hero, 0);
-	}
-	if (keyb.getKey(A_KEY)) {
-		var char = world.getCharacterInFrontOf(hero);
-		if (char) {
-			console.log("A to " + char);
-		}
-	}
-	if (keyb.getKey(S_KEY)) {
-		var char = world.getCharacterInFrontOf(hero);
-		if (char) {
-			console.log("S to " + char);
-		}
-	}
-	if (keyb.getKey(Z_KEY)) {
-		var char = world.getCharacterInFrontOf(hero);
-		if (char) {
-			console.log("Z to " + char);
-		}
-	}
-	if (keyb.getKey(X_KEY)) {
-		var char = world.getCharacterInFrontOf(hero);
-		if (char) {
-			console.log("X to " + char);
-		}
-	}
-	
 }, null)
-
-function keydown(key) {
-	keyb.setKeyDown(key);
-}
-
-function keyup(key) {
-	keyb.setKeyUp(key);
-}
-
-document.getElementById("upbutton").addEventListener("touchstart", function() {keydown(UP_ARROW_KEY)}, false );
-document.getElementById("upbutton").addEventListener("touchend", function() {keyup(UP_ARROW_KEY)}, false );
-document.getElementById("upbutton").addEventListener("touchleave", function() {keyup(UP_ARROW_KEY)}, false );
-
-document.getElementById("downbutton").addEventListener("touchstart", function() {keydown(DOWN_ARROW_KEY)}, false );
-document.getElementById("downbutton").addEventListener("touchend", function() {keyup(DOWN_ARROW_KEY)}, false );
-document.getElementById("downbutton").addEventListener("touchleave", function() {keyup(DOWN_ARROW_KEY)}, false );
-
-document.getElementById("leftbutton").addEventListener("touchstart", function() {keydown(LEFT_ARROW_KEY)}, false );
-document.getElementById("leftbutton").addEventListener("touchend", function() {keyup(LEFT_ARROW_KEY)}, false );
-document.getElementById("leftbutton").addEventListener("touchleave", function() {keyup(LEFT_ARROW_KEY)}, false );
-
-document.getElementById("rightbutton").addEventListener("touchstart", function() {keydown(RIGHT_ARROW_KEY)}, false );
-document.getElementById("rightbutton").addEventListener("touchend", function() {keyup(RIGHT_ARROW_KEY)}, false );
-document.getElementById("rightbutton").addEventListener("touchleave", function() {keyup(RIGHT_ARROW_KEY)}, false );
-
-
 
 </script>
 

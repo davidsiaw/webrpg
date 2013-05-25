@@ -11,6 +11,7 @@ X_KEY = 88
 function KeyWatcher()
 {
 	var keys = {};
+	var callbacks = {};
 	
 	// todo support gamepad
 	/*
@@ -40,6 +41,9 @@ function KeyWatcher()
 	
 	document.onkeydown = function(key)
 	{
+		if (callbacks[key.keyCode]) {
+			callbacks[key.keyCode]();
+		}
 		keys[key.keyCode] = true;
 	}
 
@@ -61,6 +65,16 @@ function KeyWatcher()
 	this.setKeyUp = function(key)
 	{
 		delete keys[key];
+	}
+	
+	this.setOnKeyDownOnce = function(key, func)
+	{
+		callbacks[key] = function() {
+			//console.log(keys[key])
+			if (func && !keys[key]) {
+				func();
+			}
+		};
 	}
 	
 	return this;

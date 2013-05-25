@@ -12,6 +12,8 @@ function DialogView(x,y,z,w,h,windowSkin)
     cc.style.top = y+"px";
     cc.style.zIndex = z;
     
+    var visible = true;
+    
     //console.log(cc)
     
     var tx=4,ty=480-100,tw=632,th=96;
@@ -40,7 +42,7 @@ function DialogView(x,y,z,w,h,windowSkin)
     
     this.update = function()
     {
-        if (!isLoaded) {
+        if (!isLoaded || !visible) {
             return;
         }
         
@@ -67,4 +69,18 @@ function DialogView(x,y,z,w,h,windowSkin)
 		ctx.drawImage(image, 128-16, 16, 16, 32, tx+tw-16, ty+yy, 16, 32);
 	}
     }
+    
+    this.hide = function()
+    {
+        cc.style.visibility = "hidden";
+        visible = false;
+    }
+    
+    this.show = function()
+    {
+        cc.style.visibility = "visible";
+        visible = true;
+    }
+    
+    return this;
 }

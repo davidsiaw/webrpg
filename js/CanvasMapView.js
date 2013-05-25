@@ -66,12 +66,15 @@ function CanvasMapView(x,y,z,w,h,mapModel)
         lastUpdateTime = new Date();
     }
     
+    var loaded = false;
+    
     tileSetImg.src = mapModel.getImage();
     tileSetImg.onload = function()
     {
         charSetImg.src = mapModel.getCharacterImage();
         charSetImg.onload = function()
         {
+	    loaded = true;
 	    self.update();
         }
     }
@@ -88,6 +91,9 @@ function CanvasMapView(x,y,z,w,h,mapModel)
     
     this.update = function()
     {
+	if (!loaded) {
+	    return;
+	}
 	update();
     }
     
