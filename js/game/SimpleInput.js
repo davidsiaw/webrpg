@@ -60,10 +60,25 @@ function SimpleInput() {
         zAction = inputs.zAction;
         xAction = inputs.xAction;
         
+        keyb.setOnKeyDown(A_KEY, inputs.aActionMatic);
+        keyb.setOnKeyDown(S_KEY, inputs.sActionMatic);
+        keyb.setOnKeyDown(Z_KEY, inputs.zActionMatic);
+        keyb.setOnKeyDown(X_KEY, inputs.xActionMatic);
+	
+        keyb.setOnKeyDown(LEFT_ARROW_KEY, inputs.leftActionMatic);
+        keyb.setOnKeyDown(RIGHT_ARROW_KEY, inputs.rightActionMatic);
+        keyb.setOnKeyDown(UP_ARROW_KEY, inputs.upActionMatic);
+        keyb.setOnKeyDown(DOWN_ARROW_KEY, inputs.downActionMatic);
+	
         keyb.setOnKeyDownOnce(A_KEY, inputs.aActionOnce);
         keyb.setOnKeyDownOnce(S_KEY, inputs.sActionOnce);
         keyb.setOnKeyDownOnce(Z_KEY, inputs.zActionOnce);
         keyb.setOnKeyDownOnce(X_KEY, inputs.xActionOnce);
+	
+        keyb.setOnKeyDownOnce(LEFT_ARROW_KEY, inputs.leftActionOnce);
+        keyb.setOnKeyDownOnce(RIGHT_ARROW_KEY, inputs.rightActionOnce);
+        keyb.setOnKeyDownOnce(UP_ARROW_KEY, inputs.upActionOnce);
+        keyb.setOnKeyDownOnce(DOWN_ARROW_KEY, inputs.downActionOnce);
     }
     
     return this;

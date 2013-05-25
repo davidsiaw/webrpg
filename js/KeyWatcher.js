@@ -11,7 +11,8 @@ X_KEY = 88
 function KeyWatcher()
 {
 	var keys = {};
-	var callbacks = {};
+	var oneHitCallbacks = {};
+	var maticHitCallbacks = {};
 	
 	// todo support gamepad
 	/*
@@ -41,8 +42,11 @@ function KeyWatcher()
 	
 	document.onkeydown = function(key)
 	{
-		if (callbacks[key.keyCode]) {
-			callbacks[key.keyCode]();
+		if (oneHitCallbacks[key.keyCode]) {
+			oneHitCallbacks[key.keyCode]();
+		}
+		if (maticHitCallbacks[key.keyCode]) {
+			maticHitCallbacks[key.keyCode]();
 		}
 		keys[key.keyCode] = true;
 	}
@@ -69,9 +73,19 @@ function KeyWatcher()
 	
 	this.setOnKeyDownOnce = function(key, func)
 	{
-		callbacks[key] = function() {
+		oneHitCallbacks[key] = function() {
 			//console.log(keys[key])
 			if (func && !keys[key]) {
+				func();
+			}
+		};
+	}
+	
+	this.setOnKeyDown = function(key, func)
+	{
+		maticHitCallbacks[key] = function() {
+			//console.log(keys[key])
+			if (func) {
 				func();
 			}
 		};

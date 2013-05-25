@@ -17,6 +17,10 @@
 <script type="text/javascript" src="js/game/SimpleInput.js"></script>
 <script type="text/javascript">
 
+function GameState() {
+	var self = this;
+}
+
 var input = new SimpleInput();
 var world = new World();
 var map = new CanvasMapView(10, 10, 0, 640,480, world.getModel());
@@ -44,17 +48,48 @@ world.setOnCollide(function(predator, victim)
 	
 });
 
+Number.prototype.clamp = function(min, max) {
+  return Math.min(Math.max(this, min), max);
+};
+
 var camera = new MapHeroCamera(map, world.getModel(), hero);
 map.setCamera(camera);
 
 dialog.hide();
 
+var currow = 0;
+var curcol = 0;
+dialog.setHighlightBox(dialog.areaGetSquare(curcol, currow));
 var dialogActions =
 {
 	zActionOnce: function()
 	{
 		input.setActions(walkAroundActions);
 		dialog.hide();
+	},
+	upActionMatic: function()
+	{
+		currow--;
+		currow = currow.clamp(0,1)
+		dialog.setHighlightBox(dialog.areaGetSquare(curcol, currow));
+	},
+	downActionMatic: function()
+	{
+		currow++;
+		currow = currow.clamp(0,1)
+		dialog.setHighlightBox(dialog.areaGetSquare(curcol, currow));
+	},
+	leftActionMatic: function()
+	{
+		curcol--;
+		curcol = curcol.clamp(0,17)
+		dialog.setHighlightBox(dialog.areaGetSquare(curcol, currow));
+	},
+	rightActionMatic: function()
+	{
+		curcol++;
+		curcol = curcol.clamp(0,17)
+		dialog.setHighlightBox(dialog.areaGetSquare(curcol, currow));
 	}
 }
 
