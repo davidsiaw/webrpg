@@ -70,6 +70,24 @@ function World(w,h) {
 		model.setOnCollide(func);
 	}
 	
+	this.getCharacterPosition = function(number)
+	{
+		var char = model.getCharacter(number);
+		return { x: char.tilex, y: char.tiley };
+	}
+	
+	this.setCharacterSlowness = function(number, slowness)
+	{
+		var char = model.getCharacter(number);
+		char.slowness = slowness;
+	}
+	
+	this.getCharacterSlowness = function(number, slowness)
+	{
+		var char = model.getCharacter(number);
+		return char.slowness;
+	}
+	
 	this.getCharacterInFrontOf = function(number, distance)
 	{
 		var tile = model.getFrontTile(number, distance);

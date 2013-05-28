@@ -186,12 +186,10 @@ function MapModel()
 	this.moveCharacter = function(number, direction)
 	{
 		var char = characters[number];
-		self.rotateCharacter(number, direction);
 		
 		var dir = getDirection(direction);
 		var dx = dir.dx;
 		var dy = dir.dy;
-		
 		
 		if (char)
 		{
@@ -200,6 +198,7 @@ function MapModel()
 				//console.log("moveright")
 				if (canMoveTo(number, char.tilex+dx, char.tiley))
 				{
+					self.rotateCharacter(number, direction);
 					moveTo(number, char.tilex+dx, char.tiley);
 					char.tilex += dx;
 					setCharMovement(char, direction);
@@ -207,7 +206,7 @@ function MapModel()
 				else
 				{
 					collide(number, getOccupant(char.tilex+dx, char.tiley));
-					//console.log("collide");
+					console.log("collide");
 					return;
 				}
 			}
@@ -217,6 +216,7 @@ function MapModel()
 				//console.log("movedown")
 				if (canMoveTo(number, char.tilex, char.tiley+dy))
 				{
+					self.rotateCharacter(number, direction);
 					moveTo(number, char.tilex, char.tiley+dy);
 					char.tiley += dy;
 					setCharMovement(char, direction);
@@ -224,7 +224,7 @@ function MapModel()
 				else
 				{
 					collide(number, getOccupant(char.tilex, char.tiley+dy));
-					//console.log("collide");
+					console.log("collide");
 					return;
 				}
 			}
