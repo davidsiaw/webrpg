@@ -41,11 +41,19 @@ function CanvasMapView(x,y,z,w,h,mapModel)
             for (var x = 0; x < tilesPerWidth; x++)
             {
                 var texcoord = mapModel.getTileOffset(cameraPos.x+x,cameraPos.y+y);
-                
-                var top = ((y - 1 - (cameraPos.y%1)) * tileSize);
-                var left = ((x - 1 - (cameraPos.x%1)) * tileSize);
-                
-                context.drawImage(tileSetImg,texcoord.x,texcoord.y,tileSize,tileSize,left,top,tileSize,tileSize);
+	    
+		var top = ((y - 1 - (cameraPos.y%1)) * tileSize);
+		var left = ((x - 1 - (cameraPos.x%1)) * tileSize);
+		    
+		if (texcoord === undefined)
+		{
+		    context.fillStyle = "#000";
+		    context.fillRect(left, top, tileSize, tileSize);
+		}
+		else
+		{
+		    context.drawImage(tileSetImg,texcoord.x,texcoord.y,tileSize,tileSize,left,top,tileSize,tileSize);
+		}
             }
         }
             

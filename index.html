@@ -16,19 +16,63 @@
 <script type="text/javascript" src="js/DialogView.js"></script>
 <script type="text/javascript" src="js/World.js"></script>
 <script type="text/javascript" src="js/game/SimpleInput.js"></script>
+<script type="text/javascript" src="js/game/GameState.js"></script>
 <script type="text/javascript">
 
-function GameState() {
-	var self = this;
-}
 
 var input = new SimpleInput();
-var world = new World();
+var world = new World(50, 50, "res/tileset.png", "res/output.png", function(char, x,y)
+	{
+		return ; //{x: 0 , y: 0};
+	});
+
 var map = new CanvasMapView(10, 10, 0, 640,480, world.getModel());
 var dialog = new DialogView(10,10,1,640,480,"res/midJQ.png");
 
 document.body.appendChild(dialog.getDiv());
 document.body.appendChild(map.getDiv());
+
+var gameState = new GameState(input, world, map);
+
+setInterval(function()
+{
+	input.checkInputs();
+	dialog.update();
+	map.update();
+	
+}, 30)
+
+var heroScript =
+[
+];
+
+var girlScript =
+[
+	Character.moveleft,
+	Character.moveleft,
+	Character.moveleft,
+	Character.moveleft,
+	Character.moveright,
+	Character.moveright,
+	Character.moveright,
+	Character.moveright,
+	Script.repeat,
+];
+
+var mainScript =
+[
+	Script.addCharacter(1,5,5,girlScript),
+	Script.showDialog(dialog),
+	Script.speechDialog(dialog, ["Once upon a time", "Amaterasu created the world", "This is the world"]),
+	Script.speechDialog(dialog, ["She was very nervous"]),
+	Script.hideDialog(dialog),
+	Script.addCharacter(0,0,0,heroScript),
+];
+
+gameState.runScript(mainScript);
+
+
+/*
 
 var hero = world.addCharacter(0,0,0);
 
@@ -43,11 +87,6 @@ for (var i=0; i<11; i++)
 }
 
 var someone = world.addCharacter(1,2,2);
-
-world.setOnCollide(function(predator, victim)
-{
-	
-});
 
 Number.prototype.clamp = function(min, max) {
   return Math.min(Math.max(this, min), max);
@@ -69,7 +108,7 @@ var dialogActions =
 		input.setActions(walkAroundActions);
 		dialog.hideNextArrow();
 		dialog.hide();
-	}/*,
+	},
 	upActionMatic: function()
 	{
 		currow--;
@@ -93,15 +132,15 @@ var dialogActions =
 		curcol++;
 		curcol = curcol.clamp(0,17)
 		dialog.setHighlightBox(dialog.areaGetRow(currow, currow));
-	}*/
+	}
 }
 
 var walkAroundActions =
 {
-	leftArrowAction: function() { world.moveCharacter(hero, 1) },
-	rightArrowAction: function() { world.moveCharacter(hero, 2) },
-	upArrowAction: function() { world.moveCharacter(hero, 3) },
-	downArrowAction: function() { world.moveCharacter(hero, 0) },
+	leftArrowAction: function() { world.moveCharacter(hero, 1); world.rotateCharacter(hero, 1); },
+	rightArrowAction: function() { world.moveCharacter(hero, 2); world.rotateCharacter(hero, 2); },
+	upArrowAction: function() { world.moveCharacter(hero, 3); world.rotateCharacter(hero, 3); },
+	downArrowAction: function() { world.moveCharacter(hero, 0); world.rotateCharacter(hero, 0); },
 	zActionOnce: function()
 	{
 		var char = world.getCharacterInFrontOf(hero);
@@ -120,16 +159,22 @@ var walkAroundActions =
 
 input.setActions(walkAroundActions);
 
-BeginUpdating(function()
-{
-	input.checkInputs();
-	dialog.update();
-	map.update();
-	
-}, null)
 
 var movementDirection = 0;
 world.setCharacterSlowness(23, 64);
+
+world.setOnCollide(function(predator, victim)
+{
+	if (movementDirection == 0)
+	{
+		movementDirection = 3;
+	}
+	if (movementDirection == 3)
+	{
+		movementDirection = 0;
+	}
+});
+
 setInterval(function()
 {
     var pos = world.getCharacterPosition(23);
@@ -140,9 +185,11 @@ setInterval(function()
     else if (pos.y === 0) {
 	movementDirection = 0;
     }
-    world.moveCharacter(23, movementDirection);
+    world.moveCharacter(23, movementDirection, true);
     
-}, 100)
+}, 90)
+
+*/
 
 </script>
 

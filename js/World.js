@@ -1,8 +1,8 @@
-function World(w,h) {
+function World(w, h, tileset, charset, mapfunc) {
 	
         var positions = {};
         var tiles = {};
-	var model = new MapModel();
+	var model = new MapModel(tileset, charset, mapfunc);
         
         function setOccupant(c, x, y)
         {
@@ -16,9 +16,10 @@ function World(w,h) {
         
         function canMoveTo(c, x, y)
         {
+	    //console.log(positions[2 + "," + 2])
             var theChar = model.getCharacter(c);
             
-            if (!getOccupant(x, y))
+            if (getOccupant(x, y) === undefined)
             {
                 return true;
             }
@@ -54,16 +55,18 @@ function World(w,h) {
             setOccupant(char, c.tilex, c.tiley); 
             return char;
         }
+	
+	this.removeCharacter = function(char) {
+		model.removeCharacter(char);
+		var c = model.getCharacter(char);
+		setOccupant(undefined, c.tilex, c.tiley);
+	}
         
-        this.moveCharacter = function(number, direction)
-        {
-            model.moveCharacter(number, direction);
-        }
+        this.moveCharacter = model.moveCharacter;
+	
+        this.rotateCharacter = model.rotateCharacter;
         
-        this.teleportCharacter = function(number, x, y)
-        {
-            model.teleportCharacter(number, x, y);
-        }
+        this.teleportCharacter = model.teleportCharacter;
 	
 	this.setOnCollide = function(func)
 	{

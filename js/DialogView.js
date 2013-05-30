@@ -196,7 +196,7 @@ function DialogView(x,y,z,w,h,windowSkin)
 	text = [ ];
 	var row = 0;
 	
-	function t()
+	function updateText()
 	{
 	    if (text.length === row) {
 		text.push("");
@@ -216,10 +216,10 @@ function DialogView(x,y,z,w,h,windowSkin)
 		text[row] += textArray[row][text[row].length];
 	    } while (textArray[row][text[row].length] == " " && text[row].length < textArray[row].length);
 	    
-	    setTimeout(t, 60);
+	    setTimeout(updateText, 60);
 	};
 	
-	t();
+	updateText();
     }
     
     this.showNextArrow = function()

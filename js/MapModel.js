@@ -1,4 +1,4 @@
-function MapModel()
+function MapModel(tileset, charset, mapfunc)
 {
 	// constants
 	var self = this;
@@ -13,17 +13,14 @@ function MapModel()
 	
 	this.getImage = function()
 	{
-		return "res/tilesetsml.png"
+		return tileset
 	}
 	
-	this.getTileOffset = function(char, x,y)
-	{
-		return {x: 0 * this.getTileSize(), y: 0};
-	}
+	this.getTileOffset = mapfunc;
 	
 	this.getCharacterImage = function()
 	{
-		return "res/output.png";
+		return charset;
 	}
 	
 	var animOffset = 0;
@@ -116,6 +113,11 @@ function MapModel()
 					{
 						char.x = resultingx;
 						char.dx = 0;
+						
+						if (char.completeMovementX) {
+							char.completeMovementX();
+							char.completeMovementX = undefined;
+						}
 					}
 					else
 					{
@@ -132,6 +134,11 @@ function MapModel()
 					{
 						char.y = resultingy;
 						char.dy = 0;
+						
+						if (char.completeMovementY) {
+							char.completeMovementY();
+							char.completeMovementY = undefined;
+						}
 					}
 					else
 					{
@@ -177,15 +184,23 @@ function MapModel()
 		return characters.length - 1;
 	}
 	
-	this.rotateCharacter = function(number, direction)
+	this.removeCharacter = function(char)
 	{
-		characters[number].offsety = direction * 48;
-		characters[number].direction = direction;
+		characters[char] = undefined;
 	}
 	
-	this.moveCharacter = function(number, direction)
+	this.rotateCharacter = function(number, direction)
 	{
 		var char = characters[number];
+		char.offsety = direction * 48;
+		char.direction = direction;
+	}
+	
+	this.moveCharacter = function(number, direction, autoRotate, onCompleteMovement)
+	{
+		var char = characters[number];
+		
+		console.log(direction)
 		
 		var dir = getDirection(direction);
 		var dx = dir.dx;
@@ -195,39 +210,48 @@ function MapModel()
 		{
 			if (!char.dx && dx && char.tilex == char.x)
 			{
+				if (autoRotate)
+				{
+					self.rotateCharacter(number, direction);
+				}
 				//console.log("moveright")
 				if (canMoveTo(number, char.tilex+dx, char.tiley))
 				{
-					self.rotateCharacter(number, direction);
 					moveTo(number, char.tilex+dx, char.tiley);
+					char.completeMovementX = onCompleteMovement;
 					char.tilex += dx;
 					setCharMovement(char, direction);
 				}
 				else
 				{
 					collide(number, getOccupant(char.tilex+dx, char.tiley));
-					console.log("collide");
+					//console.log("collide");
 					return;
 				}
 			}
 			
 			if (!char.dy && dy && char.tiley == char.y)
 			{
+				if (autoRotate)
+				{
+					self.rotateCharacter(number, direction);
+				}
 				//console.log("movedown")
 				if (canMoveTo(number, char.tilex, char.tiley+dy))
 				{
-					self.rotateCharacter(number, direction);
 					moveTo(number, char.tilex, char.tiley+dy);
+					char.completeMovementY = onCompleteMovement;
 					char.tiley += dy;
 					setCharMovement(char, direction);
 				}
 				else
 				{
 					collide(number, getOccupant(char.tilex, char.tiley+dy));
-					console.log("collide");
+					//console.log("collide");
 					return;
 				}
 			}
+			
 		}
 	}
 	
