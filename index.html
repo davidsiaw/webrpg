@@ -40,22 +40,24 @@ setInterval(function()
 	dialog.update();
 	map.update();
 	
-}, 30)
+}, 16)
 
 var heroScript =
 [
+	
 ];
 
 var girlScript =
 [
-	Character.moveleft,
-	Character.moveleft,
-	Character.moveleft,
-	Character.moveleft,
-	Character.moveright,
-	Character.moveright,
-	Character.moveright,
-	Character.moveright,
+	Character.setSlow(64),
+	Character.walkLeft,
+	Character.walkLeft,
+	Character.walkLeft,
+	Character.walkLeft,
+	Character.walkRight,
+	Character.walkRight,
+	Character.walkRight,
+	Character.walkRight,
 	Script.repeat,
 ];
 

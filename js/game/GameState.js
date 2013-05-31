@@ -50,21 +50,47 @@ function GameState(input, world, map)
 }
 
 var Character = {
-    moveleft: function(gameState, next)
+    walkLeft: function(gameState, next)
     {
-        gameState.world.moveCharacter(gameState.currChar, 1 ,true, function()
+        gameState.world.moveCharacter(gameState.currChar, 1, true, function()
         {
             next();
         });
     },
     
-    moveright: function(gameState, next)
+    walkRight: function(gameState, next)
     {
-        gameState.world.moveCharacter(gameState.currChar, 2 ,true, function()
+        gameState.world.moveCharacter(gameState.currChar, 2, true, function()
         {
             next();
         });
     },
+    
+    walkUp: function(gameState, next)
+    {
+        gameState.world.moveCharacter(gameState.currChar, 3, true, function()
+        {
+            next();
+        });
+    },
+    
+    walkDown: function(gameState, next)
+    {
+        gameState.world.moveCharacter(gameState.currChar, 0, true, function()
+        {
+            next();
+        });
+    },
+    
+    setSlow: function(slowness)
+    {
+        return function(gameState, next)
+        {
+            //console.log(slowness)
+            gameState.world.setCharacterSlowness(gameState.currChar, slowness);
+            next();
+        }
+    }
 }
 
 var Script = {
@@ -110,6 +136,7 @@ var Script = {
                 zActionOnce: function()
                 {
                     dialog.hideNextArrow();
+                    gameState.input.setActions({});
                     next();
                 },
             }

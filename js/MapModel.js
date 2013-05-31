@@ -200,7 +200,7 @@ function MapModel(tileset, charset, mapfunc)
 	{
 		var char = characters[number];
 		
-		console.log(direction)
+		//console.log(direction)
 		
 		var dir = getDirection(direction);
 		var dx = dir.dx;
