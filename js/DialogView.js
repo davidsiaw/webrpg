@@ -213,6 +213,9 @@ function DialogView(x,y,z,w,h,windowSkin)
 	    }
 	    
 	    do {
+		if (!textArray[row][text[row].length]) {
+		    break;
+		}
 		text[row] += textArray[row][text[row].length];
 	    } while (textArray[row][text[row].length] == " " && text[row].length < textArray[row].length);
 	    

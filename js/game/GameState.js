@@ -49,7 +49,8 @@ function GameState(input, world, map)
     }
 }
 
-var Character = {
+var Character =
+{
     walkLeft: function(gameState, next)
     {
         gameState.world.moveCharacter(gameState.currChar, 1, true, function()
@@ -90,10 +91,13 @@ var Character = {
             gameState.world.setCharacterSlowness(gameState.currChar, slowness);
             next();
         }
-    }
+    },
+    
+    
 }
 
-var Script = {
+var Script =
+{
     log: function(text)
     {
         return function(gameState, next)
