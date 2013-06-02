@@ -35,23 +35,32 @@ function CanvasMapView(x,y,z,w,h,mapModel)
         mapModel.advanceTime(timeBetween);
         
         var cameraPos = camera.getLocation();
-        
         for (var y = 0; y < tilesPerHeight; y++)
         {
             for (var x = 0; x < tilesPerWidth; x++)
             {
                 var texcoord = mapModel.getTileOffset(cameraPos.x+x,cameraPos.y+y);
 	    
-		var top = ((y - 1 - (cameraPos.y%1)) * tileSize);
-		var left = ((x - 1 - (cameraPos.x%1)) * tileSize);
-		    
-		if (texcoord === undefined)
+		var biasedFracY = cameraPos.y%1;
+		var biasedFracX = cameraPos.x%1;
+		
+		if (biasedFracX % 1 == 0) {
+		    biasedFracX = -1;
+		}
+		if (biasedFracY % 1 == 0) {
+		    biasedFracY = -1;
+		}
+		
+		var top = ((y - 1 - biasedFracY) * tileSize);
+		var left = ((x - 1 - biasedFracX) * tileSize);
+		
+		if (!texcoord)
 		{
 		    context.fillStyle = "#000";
 		    context.fillRect(left, top, tileSize, tileSize);
 		}
 		else
-		{
+		{   
 		    context.drawImage(tileSetImg,texcoord.x,texcoord.y,tileSize,tileSize,left,top,tileSize,tileSize);
 		}
             }
