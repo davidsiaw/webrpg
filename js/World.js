@@ -2,8 +2,15 @@ function World(w, h, tileset, charset, mapfunc) {
 	
         var positions = {};
         var tiles = {};
-	var model = new MapModel(tileset, charset, mapfunc);
-        
+	var model = new MapModel(tileset, charset, function(x,y)
+	{
+		if (x >= 0 && x < w && y >= 0 && y < h)
+		{
+			return mapfunc(x,y);
+		}
+		return undefined;
+	});
+
         function setOccupant(c, x, y)
         {
             positions[x + "," + y] = c;
@@ -67,11 +74,6 @@ function World(w, h, tileset, charset, mapfunc) {
         this.rotateCharacter = model.rotateCharacter;
         
         this.teleportCharacter = model.teleportCharacter;
-	
-	this.setOnCollide = function(func)
-	{
-		model.setOnCollide(func);
-	}
 	
 	this.getCharacterPosition = function(number)
 	{
