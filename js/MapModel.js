@@ -25,7 +25,6 @@ function MapModel(tileset, charset, mapfunc)
 	
 	var animOffset = 0;
 	var characters = [];
-	var collide = function(predator, victim) { }
 	var canMoveTo = function (c,x,y) { return true; }
 	var moveTo = function (c,x,y) { return true; }
 	var getOccupant = function (x,y) { return undefined; }
@@ -82,11 +81,6 @@ function MapModel(tileset, charset, mapfunc)
 		getOccupant = func;
 	}
 	
-	this.setOnCollide = function(func)
-	{
-		collide = func;
-	}
-	
 	this.advanceTime = function(milSecAdvanced)
 	{
 		var framesAdvanced = Math.round(milSecAdvanced / 8);
@@ -114,7 +108,8 @@ function MapModel(tileset, charset, mapfunc)
 						char.x = resultingx;
 						char.dx = 0;
 						
-						if (char.completeMovementX) {
+						if (char.completeMovementX)
+						{
 							char.completeMovementX();
 							char.completeMovementX = undefined;
 						}
@@ -135,7 +130,8 @@ function MapModel(tileset, charset, mapfunc)
 						char.y = resultingy;
 						char.dy = 0;
 						
-						if (char.completeMovementY) {
+						if (char.completeMovementY)
+						{
 							char.completeMovementY();
 							char.completeMovementY = undefined;
 						}
@@ -196,8 +192,9 @@ function MapModel(tileset, charset, mapfunc)
 		char.direction = direction;
 	}
 	
-	this.moveCharacter = function(number, direction, autoRotate, onCompleteMovement)
+	this.moveCharacter = function(number, direction, autoRotate, onCompleteMovement, onCollide)
 	{
+		onCollide = onCollide || function() { };
 		var char = characters[number];
 		
 		//console.log(direction)
@@ -224,7 +221,7 @@ function MapModel(tileset, charset, mapfunc)
 				}
 				else
 				{
-					collide(number, getOccupant(char.tilex+dx, char.tiley));
+					onCollide(getOccupant(char.tilex+dx, char.tiley));
 					//console.log("collide");
 					return;
 				}
@@ -246,7 +243,7 @@ function MapModel(tileset, charset, mapfunc)
 				}
 				else
 				{
-					collide(number, getOccupant(char.tilex, char.tiley+dy));
+					onCollide(getOccupant(char.tilex, char.tiley+dy));
 					//console.log("collide");
 					return;
 				}
