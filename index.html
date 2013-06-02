@@ -21,10 +21,10 @@
 
 
 var input = new SimpleInput();
-var world = new World(50, 50, "res/tileset.png", "res/output.png", function(char, x,y)
-	{
-		return ; //{x: 0 , y: 0};
-	});
+var world = new World(1, 1, "res/tileset.png", "res/output.png", function(x,y)
+{
+	return {x: 0, y: 0};
+});
 
 var map = new CanvasMapView(10, 10, 0, 640,480, world.getModel());
 var dialog = new DialogView(10,10,1,640,480,"res/midJQ.png");
@@ -44,7 +44,8 @@ setInterval(function()
 
 var heroScript =
 [
-	
+	Character.centerCamera,
+	Character.assignDirectionalControl,
 ];
 
 var girlScript =
@@ -64,9 +65,9 @@ var girlScript =
 var mainScript =
 [
 	Script.addCharacter(1,5,5,girlScript),
-	Script.showDialog(dialog),
-	Script.speechDialog(dialog, ["Sie sind das Essen und we sind die Jager", "", "This is the world"]),
-	Script.speechDialog(dialog, ["She was very nervous"]),
+	//Script.showDialog(dialog),
+	//Script.speechDialog(dialog, ["Sie sind das Essen und we sind die Jager", "", "This is the world"]),
+	//Script.speechDialog(dialog, ["She was very nervous"]),
 	Script.hideDialog(dialog),
 	Script.addCharacter(0,0,0,heroScript),
 ];

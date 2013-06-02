@@ -56,12 +56,20 @@ var Character =
         gameState.world.moveCharacter(gameState.currChar, 1, true, function()
         {
             next();
+        },
+	function()
+        {
+            next();
         });
     },
     
     walkRight: function(gameState, next)
     {
         gameState.world.moveCharacter(gameState.currChar, 2, true, function()
+        {
+            next();
+        },
+	function()
         {
             next();
         });
@@ -72,12 +80,20 @@ var Character =
         gameState.world.moveCharacter(gameState.currChar, 3, true, function()
         {
             next();
+        },
+	function()
+        {
+            next();
         });
     },
     
     walkDown: function(gameState, next)
     {
         gameState.world.moveCharacter(gameState.currChar, 0, true, function()
+        {
+            next();
+        },
+	function()
         {
             next();
         });
@@ -93,7 +109,44 @@ var Character =
         }
     },
     
+    centerCamera: function(gameState, next)
+    {
+	//console.log(slowness)
+	var camera = new MapHeroCamera(gameState.map, gameState.world.getModel(), gameState.currChar);
+	gameState.map.setCamera(camera);
+	next();
+    },
     
+    assignDirectionalControl: function(gameState, next)
+    {
+		
+	console.log(gameState.currChar);
+	function walkAroundActions(theChar)
+	{
+		this.leftArrowAction = function()
+		{
+		    gameState.world.moveCharacter(theChar, 1);
+		    gameState.world.rotateCharacter(theChar, 1);
+		};
+		this.rightArrowAction = function()
+		{
+		    gameState.world.moveCharacter(theChar, 2);
+		    gameState.world.rotateCharacter(theChar, 2);
+		};
+		this.upArrowAction = function()
+		{
+		    gameState.world.moveCharacter(theChar, 3);
+		    gameState.world.rotateCharacter(theChar, 3);
+		};
+		this.downArrowAction = function()
+		{
+		    gameState.world.moveCharacter(theChar, 0);
+		    gameState.world.rotateCharacter(theChar, 0);
+		};
+	}
+	gameState.input.setActions(new walkAroundActions(gameState.currChar));
+	next();
+    },
 }
 
 var Script =
@@ -135,12 +188,13 @@ var Script =
     {
         return function(gameState, next)
         {
+	    var prevActions = gameState.input.getActions();
             var dialogActions =
             {
                 zActionOnce: function()
                 {
                     dialog.hideNextArrow();
-                    gameState.input.setActions({});
+                    gameState.input.setActions(prevActions);
                     next();
                 },
             }
@@ -171,4 +225,5 @@ var Script =
             next();
         }
     },
+    
 }

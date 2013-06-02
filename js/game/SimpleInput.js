@@ -12,6 +12,8 @@ function SimpleInput() {
     var zAction = function() {}
     var xAction = function() {}
     
+    var currActions = {};
+    
     this.checkInputs = function()
     {
 	if (keyb.getKey(LEFT_ARROW_KEY) && leftArrowAction)
@@ -48,8 +50,15 @@ function SimpleInput() {
 	}
     }
     
+    this.getActions = function()
+    {
+	return currActions;
+    }
+    
     this.setActions = function(inputs)
     {
+	currActions = inputs;
+	
         leftArrowAction = inputs.leftArrowAction;
         rightArrowAction = inputs.rightArrowAction;
         upArrowAction = inputs.upArrowAction;
