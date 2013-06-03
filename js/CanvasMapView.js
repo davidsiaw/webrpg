@@ -48,8 +48,8 @@ function CanvasMapView(x,y,z,w,h,mapModel)
 		var biasedFracY = (cameraPos.y + tileSize * h) % 1;
 		var biasedFracX = (cameraPos.x + tileSize * w) % 1;
 		
-		var top = ((y - 1 - biasedFracY) * tileSize);
-		var left = ((x - 1 - biasedFracX) * tileSize);
+		var top = ((y - biasedFracY) * tileSize);
+		var left = ((x - biasedFracX) * tileSize);
 		
 		if (!texcoord)
 		{

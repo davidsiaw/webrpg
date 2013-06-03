@@ -23,6 +23,12 @@ function World(w, h, tileset, charset, mapfunc) {
         
         function canMoveTo(c, x, y)
         {
+		
+		if (x < 0 || x >= w || y < 0 || y >= h)
+		{
+			return false;
+		}
+		
 	    //console.log(positions[2 + "," + 2])
             var theChar = model.getCharacter(c);
             
@@ -39,7 +45,8 @@ function World(w, h, tileset, charset, mapfunc) {
             return true;
         }
         
-        function moveTo(c, x, y) {
+        function moveTo(c, x, y)
+	{
             //console.log(x + "," + y)
             var theChar = model.getCharacter(c);
             setOccupant(undefined,theChar.tilex,theChar.tiley)
