@@ -30,7 +30,6 @@ function CanvasMapView(x,y,z,w,h,mapModel)
     
     function sign(x) { return x > 0 ? 1 : x < 0 ? -1 : 0; }
     
-    var lastx = 0;
     function update()
     {
 	var timeBetween = new Date() - lastUpdateTime;
@@ -59,11 +58,6 @@ function CanvasMapView(x,y,z,w,h,mapModel)
 		}
 		else
 		{
-		    if (lastx !== cameraPos.y) {
-			console.log(cameraPos.y + " " + y + " " + top)
-			lastx = cameraPos.y;
-		    }
-		    
 		    context.drawImage(tileSetImg,texcoord.x,texcoord.y,tileSize,tileSize,left,top,tileSize,tileSize);
 		}
             }
