@@ -27,7 +27,10 @@ function CanvasMapView(x,y,z,w,h,mapModel)
     }
     
     var lastUpdateTime = new Date();
-	
+    
+    function sign(x) { return x > 0 ? 1 : x < 0 ? -1 : 0; }
+    
+    var lastx = 0;
     function update()
     {
 	var timeBetween = new Date() - lastUpdateTime;
@@ -35,21 +38,16 @@ function CanvasMapView(x,y,z,w,h,mapModel)
         mapModel.advanceTime(timeBetween);
         
         var cameraPos = camera.getLocation();
+	
+	
         for (var y = 0; y < tilesPerHeight; y++)
         {
             for (var x = 0; x < tilesPerWidth; x++)
             {
                 var texcoord = mapModel.getTileOffset(cameraPos.x+x,cameraPos.y+y);
 	    
-		var biasedFracY = cameraPos.y%1;
-		var biasedFracX = cameraPos.x%1;
-		
-		if (biasedFracX % 1 == 0) {
-		    biasedFracX = -1;
-		}
-		if (biasedFracY % 1 == 0) {
-		    biasedFracY = -1;
-		}
+		var biasedFracY = (cameraPos.y + tileSize * h) % 1;
+		var biasedFracX = (cameraPos.x + tileSize * w) % 1;
 		
 		var top = ((y - 1 - biasedFracY) * tileSize);
 		var left = ((x - 1 - biasedFracX) * tileSize);
@@ -60,7 +58,12 @@ function CanvasMapView(x,y,z,w,h,mapModel)
 		    context.fillRect(left, top, tileSize, tileSize);
 		}
 		else
-		{   
+		{
+		    if (lastx !== cameraPos.y) {
+			console.log(cameraPos.y + " " + y + " " + top)
+			lastx = cameraPos.y;
+		    }
+		    
 		    context.drawImage(tileSetImg,texcoord.x,texcoord.y,tileSize,tileSize,left,top,tileSize,tileSize);
 		}
             }
