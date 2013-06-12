@@ -19,61 +19,172 @@
 <script type="text/javascript" src="js/game/GameState.js"></script>
 <script type="text/javascript">
 
-
-var input = new SimpleInput();
-var world = new World(20, 20, "res/tileset.png", "res/output.png", function(x,y)
+var tileInfo = [];
+tileInfo.push(
 {
-	return {x: 0, y: 0};
+	type: "simple",
+	passable: true,
+	coords:[ {x:32, y:32} ]
 });
 
-var map = new CanvasMapView(10, 10, 0, 640,480, world.getModel());
-var dialog = new DialogView(10,10,1,640,480,"res/midJQ.png");
-
-document.body.appendChild(dialog.getDiv());
-document.body.appendChild(map.getDiv());
-
-var gameState = new GameState(input, world, map);
-
-setInterval(function()
+tileInfo.push(
 {
-	input.checkInputs();
-	dialog.update();
-	map.update();
+	type: "simple",
+	coords:[ {x:64, y:64} ]
+});
+tileInfo.push(
+{
+	type: "simple",
+	coords:[ {x:64, y:96} ]
+});
+tileInfo.push(
+{
+	type: "simple",
+	coords:[ {x:64, y:128} ]
+});
+tileInfo.push(
+{
+	type: "simple",
+	coords:[ {x:32, y:128} ]
+});
+tileInfo.push(
+{
+	type: "simple",
+	coords:[ {x:0, y:128} ]
+});
+tileInfo.push(
+{
+	type: "simple",
+	coords:[ {x:0, y:96} ]
+});
+tileInfo.push(
+{
+	type: "simple",
+	coords:[ {x:0, y:64} ]
+});
+tileInfo.push(
+{
+	type: "simple",
+	coords:[ {x:32, y:64} ]
+});
+tileInfo.push(
+{
+	type: "simple",
+	coords:[ {x:32, y:96} ]
+});
+tileInfo.push(
+{
+	type: "simple",
+	coords:[ {x:64, y:32} ]
+});
+tileInfo.push(
+{
+	type: "simple",
+	coords:[ {x:0, y:32} ]
+});
+
+tileInfo.push(
+{
+	type: "autotile12",
+	passable: false,
+	indexes: [1,2,3,4,5,6,7,8,9,10,11]
+});
+
+var mapInfo = {};
+mapInfo.map = [];
+mapInfo.width = 10;
+mapInfo.height = 10;
+mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
+mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
+mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
+mapInfo.map.push([0,0,0,0,0,12,0,0,0,0]);
+mapInfo.map.push([0,0,0,0,12,12,12,0,0,0]);
+mapInfo.map.push([0,0,0,0,0,12,0,0,0,0]);
+mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
+mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
+mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
+mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
+mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
+
+var charImg = new Image();
+var tilesetImg = new Image();
+
+charImg.src = "res/output.png";
+charImg.onload = function ()
+{
+	tilesetImg.src = "res/tiles0.png";
+	tilesetImg.onload = function()
+	{
+		startGame();
+	}
+}
+
+function startGame()
+{
+	var input = new SimpleInput();
+	var world = new World(tilesetImg, charImg, tileInfo, mapInfo);
 	
-}, 16)
+	var map = new CanvasMapView(10, 10, 0, 640,480, world.getModel());
+	var dialog = new DialogView(10,10,1,640,480,"res/midJQ.png");
+	
+	document.body.appendChild(dialog.getDiv());
+	document.body.appendChild(map.getDiv());
+	
+	var gameState = new GameState(input, world, map);
+	
+	setInterval(function()
+	{
+		input.checkInputs();
+		dialog.update();
+		map.update();
+		
+	}, 16)
+	
+	var heroScript =
+	[
+		Character.centerCamera,
+		Character.assignDirectionalControl,
+		Character.assignZ(function(char)
+		{
+			var front = world.getPositionOf(char, 1);
+			mapInfo.map[front.y][front.x] = 12;
+			world.rerenderWorld();
+		}),
+		Character.assignX(function(char)
+		{
+			var front = world.getFrontOf(char, 1);
+			mapInfo.map[front.y][front.x] = 0;
+			world.rerenderWorld();
+		}),
+	];
+	
+	var girlScript =
+	[
+		Character.setSlow(64),
+		Character.walkLeft,
+		Character.walkLeft,
+		Character.walkLeft,
+		Character.walkLeft,
+		Character.walkRight,
+		Character.walkRight,
+		Character.walkRight,
+		Character.walkRight,
+		Script.repeat,
+	];
+	
+	var mainScript =
+	[
+		Script.addCharacter(1,5,5,girlScript),
+		//Script.showDialog(dialog),
+		//Script.speechDialog(dialog, ["Sie sind das Essen und we sind die Jager", "", "This is the world"]),
+		//Script.speechDialog(dialog, ["She was very nervous"]),
+		Script.hideDialog(dialog),
+		Script.addCharacter(0,0,0,heroScript),
+	];
+	
+	gameState.runScript(mainScript);
 
-var heroScript =
-[
-	Character.centerCamera,
-	Character.assignDirectionalControl,
-];
-
-var girlScript =
-[
-	Character.setSlow(64),
-	Character.walkLeft,
-	Character.walkLeft,
-	Character.walkLeft,
-	Character.walkLeft,
-	Character.walkRight,
-	Character.walkRight,
-	Character.walkRight,
-	Character.walkRight,
-	Script.repeat,
-];
-
-var mainScript =
-[
-	Script.addCharacter(1,5,5,girlScript),
-	//Script.showDialog(dialog),
-	//Script.speechDialog(dialog, ["Sie sind das Essen und we sind die Jager", "", "This is the world"]),
-	//Script.speechDialog(dialog, ["She was very nervous"]),
-	Script.hideDialog(dialog),
-	Script.addCharacter(0,0,0,heroScript),
-];
-
-gameState.runScript(mainScript);
-
+}
 
 /*
 

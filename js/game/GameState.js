@@ -119,8 +119,6 @@ var Character =
     
     assignDirectionalControl: function(gameState, next)
     {
-		
-	console.log(gameState.currChar);
 	function walkAroundActions(theChar)
 	{
 		this.leftArrowAction = function()
@@ -146,6 +144,29 @@ var Character =
 	}
 	gameState.input.setActions(new walkAroundActions(gameState.currChar));
 	next();
+    },
+
+    assignZ: function(action)
+    {
+	return function(gameState, next)
+	{
+	    var currActions = gameState.input.getActions();
+	    var currChar = gameState.currChar;
+	    currActions.zActionOnce = function() { action(currChar); };
+	    gameState.input.setActions(currActions);
+	    next();
+	}
+    },
+    assignX: function(action)
+    {
+	return function(gameState, next)
+	{
+	    var currActions = gameState.input.getActions();
+	    var currChar = gameState.currChar;
+	    currActions.xActionOnce = function() { action(currChar); };
+	    gameState.input.setActions(currActions);
+	    next();
+	}
     },
 }
 

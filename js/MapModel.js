@@ -1,4 +1,4 @@
-function MapModel(tileset, charset, mapfunc)
+function MapModel(tileset, charset, tileSize, mapfunc)
 {
 	// constants
 	var self = this;
@@ -8,7 +8,7 @@ function MapModel(tileset, charset, mapfunc)
 	// func
 	this.getTileSize = function()
 	{
-		return 32;
+		return tileSize;
 	}
 	
 	this.getImage = function()
@@ -264,6 +264,11 @@ function MapModel(tileset, charset, mapfunc)
 			return 0;
 		}
 		return 1;
+	}
+	
+	this.getPositionOf = function(number)
+	{
+		return {x: characters[number].tilex, y: characters[number].tiley};
 	}
 	
 	this.getFrontTile = function (number, distance)
