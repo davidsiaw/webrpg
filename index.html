@@ -90,21 +90,33 @@ tileInfo.push(
 	indexes: [1,2,3,4,5,6,7,8,9,10,11]
 });
 
-var mapInfo = {};
-mapInfo.map = [];
-mapInfo.width = 10;
-mapInfo.height = 10;
-mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
-mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
-mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
-mapInfo.map.push([0,0,0,0,0,12,0,0,0,0]);
-mapInfo.map.push([0,0,0,0,12,12,12,0,0,0]);
-mapInfo.map.push([0,0,0,0,0,12,0,0,0,0]);
-mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
-mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
-mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
-mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
-mapInfo.map.push([0,0,0,0,0,0,0,0,0,0]);
+function Map(w,h)
+{
+	var tiles = {};
+	this.width = w;
+	this.height = h;
+	
+	function makeTileKey(x,y) {
+		return x + "," + y;
+	}
+	
+	this.map = function(x,y)
+	{
+		if (tiles[makeTileKey(x,y)])
+		{
+			return tiles[makeTileKey(x,y)];
+		}
+		return 0;
+	}
+	
+	this.setTile = function (x,y,tile)
+	{
+		tiles[makeTileKey(x,y)] = tile;
+	}
+	return this;
+}
+
+var mapInfo = new Map(10,10);
 
 var charImg = new Image();
 var tilesetImg = new Image();
@@ -147,13 +159,13 @@ function startGame()
 		Character.assignZ(function(char)
 		{
 			var front = world.getPositionOf(char, 1);
-			mapInfo.map[front.y][front.x] = 12;
+			mapInfo.setTile(front.x, front.y, 12);
 			world.rerenderWorld();
 		}),
 		Character.assignX(function(char)
 		{
 			var front = world.getFrontOf(char, 1);
-			mapInfo.map[front.y][front.x] = 0;
+			mapInfo.setTile(front.x, front.y, 0);
 			world.rerenderWorld();
 		}),
 	];

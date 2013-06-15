@@ -36,12 +36,12 @@ function World(tileset, charset, tileinfo, mapinfo)
             {
                 return 1;
             }
-            return tileid == mapinfo.map[y][x] ? 1 : 0;
+            return tileid == mapinfo.map(x,y) ? 1 : 0;
         }
 
         function surroundings(mapinfo, x, y)
         {
-	    var tileid = mapinfo.map[y][x];
+	    var tileid = mapinfo.map(x,y);
             return (
                 (isTileSame(tileid, mapinfo, x+1, y-1) << 0) |
                 (isTileSame(tileid, mapinfo, x+1, y+1) << 1) |
@@ -76,7 +76,7 @@ function World(tileset, charset, tileinfo, mapinfo)
 		{
 			for (var y = 0; y < h; y++)
 			{
-				var tileid = mapinfo.map[y][x];
+				var tileid = mapinfo.map(x,y);
 				var tile = tileinfo[tileid];
 				var surrounding = surroundings(mapinfo, x, y);
 				if (tile.type === "simple")
@@ -150,7 +150,7 @@ function World(tileset, charset, tileinfo, mapinfo)
 	    //console.log(positions[2 + "," + 2])
             var theChar = model.getCharacter(c);
             
-	var tileid = mapinfo.map[y][x];
+	var tileid = mapinfo.map(x,y);
 	var tile = tileinfo[tileid];
 	    if (!tile.passable)
 	    {
