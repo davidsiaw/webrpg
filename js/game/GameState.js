@@ -1,3 +1,14 @@
+function GameCharacter(id)
+{
+    var self = this;
+    
+    this.id = id;
+    this.charScriptRunning = true;
+    
+    return self;
+}
+
+
 function GameState(input, world, map)
 {
     var self = this;
@@ -5,6 +16,10 @@ function GameState(input, world, map)
     this.world = world;
     this.input = input;
     this.map = map;
+    this.characters = {};
+    
+    this.interactionScripts = {};
+    
     this.currChar = undefined;
     
     this.repeat = false;
@@ -12,12 +27,15 @@ function GameState(input, world, map)
     this.runScript = function(script)
     {
         var cur = 0;
-        function invoke() {
-            if (self.repeat) {
+        function invoke()
+	{
+            if (self.repeat)
+	    {
                 cur = 0;
                 self.repeat = false;
             }
-            if (cur >= script.length) {
+            if (cur >= script.length)
+	    {
                 return;
             }
             setTimeout(function() { script[cur++](self, invoke) },0);
@@ -29,20 +47,68 @@ function GameState(input, world, map)
     this.characterScript = function(character, script)
     {
         var cur = 0;
-        function invoke() {
-            if (self.repeat) {
+        function invoke()
+	{
+            if (self.repeat)
+	    {
                 cur = 0;
                 self.repeat = false;
             }
-            if (cur >= script.length) {
+            if (cur >= script.length)
+	    {
                 return;
             }
+	    
+	    self.currChar = character;
+	    function resume(args)
+	    {
+		if (self.characters[character] && self.characters[character].charScriptRunning)
+		{
+		    setTimeout(function()
+		    {
+			self.currChar = character;
+			script[cur++](self, invoke)
+		    },0);
+		}
+		else
+		{
+		    setTimeout(function()
+		    {
+			resume();
+		    },0);
+		}
+	    }
             
-            setTimeout(function()
-            {
-                self.currChar = character;
-                script[cur++](self, invoke)
-            },0);
+	    resume();
+        }
+        
+        invoke();
+    }
+    
+    this.interactionScript = function(interactor, interactee, script)
+    {
+        var cur = 0;
+        function invoke()
+	{
+            if (self.repeat)
+	    {
+                cur = 0;
+                self.repeat = false;
+            }
+            if (cur >= script.length)
+	    {
+                return;
+            }
+	    
+	    self.interactor = interactor;
+	    self.interactee = interactee;
+	    
+	    setTimeout(function()
+	    {
+		self.interactor = interactor;
+		self.interactee = interactee;
+		script[cur++](self, invoke)
+	    },0);
         }
         
         invoke();
@@ -146,29 +212,110 @@ var Character =
 	next();
     },
 
-    assignZ: function(action)
+    assignZ: function(script)
     {
 	return function(gameState, next)
 	{
 	    var currActions = gameState.input.getActions();
 	    var currChar = gameState.currChar;
-	    currActions.zActionOnce = function() { action(currChar); };
+	    currActions.zActionOnce = function() { gameState.characterScript(currChar, script); };
 	    gameState.input.setActions(currActions);
 	    next();
 	}
     },
-    assignX: function(action)
+    
+    assignX: function(script)
     {
 	return function(gameState, next)
 	{
 	    var currActions = gameState.input.getActions();
 	    var currChar = gameState.currChar;
-	    currActions.xActionOnce = function() { action(currChar); };
+	    currActions.xActionOnce = function() { gameState.characterScript(currChar, script); };
 	    gameState.input.setActions(currActions);
 	    next();
 	}
     },
+    
+    assignA: function(script)
+    {
+	return function(gameState, next)
+	{
+	    var currActions = gameState.input.getActions();
+	    var currChar = gameState.currChar;
+	    currActions.aActionOnce = function() { gameState.characterScript(currChar, script); };
+	    gameState.input.setActions(currActions);
+	    next();
+	}
+    },
+    
+    assignInteract: function(script)
+    {
+        return function(gameState, next)
+        {
+	    gameState.interactionScripts[gameState.currChar] = script;
+	    next();
+        }
+    },
+    
+    interact: function(gameState, next)
+    {
+	var front = gameState.world.getCharacterInFrontOf(gameState.currChar, 1);
+	if (gameState.interactionScripts[front])
+	{
+	    gameState.interactionScript(gameState.currChar, front, gameState.interactionScripts[front]);
+	}
+	next();
+    },
+    
+    customAction: function(func)
+    {
+        return function(gameState, next)
+        {
+	    func(gameState.currChar);
+            next();
+        }
+    }
 }
+
+var Interaction =
+{
+    faceInteractor: function(gameState, next)
+    {
+	var world = gameState.world;
+	var interactorPos = world.getCharacterPosition(gameState.interactor);
+	var interacteePos = world.getCharacterPosition(gameState.interactee);
+	
+	if (interactorPos.x < interacteePos.x) {
+	    world.rotateCharacter(gameState.interactee, 1);
+	}
+	
+	if (interactorPos.x > interacteePos.x) {
+	    world.rotateCharacter(gameState.interactee, 2);
+	}
+	
+	if (interactorPos.y < interacteePos.y) {
+	    world.rotateCharacter(gameState.interactee, 3);
+	}
+	
+	if (interactorPos.y > interacteePos.y) {
+	    world.rotateCharacter(gameState.interactee, 0);
+	}
+	
+	next();
+    },
+    
+    pauseInteractee: function(gameState, next)
+    {
+	gameState.characters[gameState.interactee].charScriptRunning = false;
+	next();
+    },
+    
+    resumeInteractee: function(gameState, next)
+    {
+	gameState.characters[gameState.interactee].charScriptRunning = true;
+	next();
+    },
+};
 
 var Script =
 {
@@ -212,7 +359,7 @@ var Script =
 	    var prevActions = gameState.input.getActions();
             var dialogActions =
             {
-                zActionOnce: function()
+                aActionOnce: function()
                 {
                     dialog.hideNextArrow();
                     gameState.input.setActions(prevActions);
@@ -220,6 +367,9 @@ var Script =
                 },
             }
             
+	    
+	    gameState.input.setActions({});
+	    
             dialog.startWritingText(text, function()
 	    {
 		dialog.showNextArrow();
@@ -234,6 +384,7 @@ var Script =
         {
             var char = gameState.world.addCharacter(charNum, x, y);
             gameState.characterScript(char, script);
+	    gameState.characters[char] = new GameCharacter(char);
             next();
         }
     },
@@ -242,9 +393,18 @@ var Script =
     {
         return function(gameState, next)
         {
-            var char = gameState.world.removeCharacter(charNum);
+            gameState.world.removeCharacter(charNum);
+	    gameState.characters[charNum] = undefined;
             next();
         }
     },
     
+    customAction: function(func)
+    {
+        return function(gameState, next)
+        {
+	    func();
+            next();
+        }
+    }
 }

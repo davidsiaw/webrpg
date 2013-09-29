@@ -5,7 +5,6 @@
 </head>
 <body>
 
-<script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/gamepad.js"></script>
 <script type="text/javascript" src="js/Update.js"></script>
 <script type="text/javascript" src="js/MapCamera.js"></script>
@@ -17,6 +16,9 @@
 <script type="text/javascript" src="js/World.js"></script>
 <script type="text/javascript" src="js/game/SimpleInput.js"></script>
 <script type="text/javascript" src="js/game/GameState.js"></script>
+
+
+
 <script type="text/javascript">
 
 var tileInfo = [];
@@ -116,7 +118,7 @@ function Map(w,h)
 	return this;
 }
 
-var mapInfo = new Map(10,10);
+var mapInfo = new Map(100,100);
 
 var charImg = new Image();
 var tilesetImg = new Image();
@@ -152,22 +154,54 @@ function startGame()
 		
 	}, 16)
 	
-	var heroScript =
+	var setTile =
 	[
-		Character.centerCamera,
-		Character.assignDirectionalControl,
-		Character.assignZ(function(char)
+		Character.customAction(function(char)
 		{
 			var front = world.getPositionOf(char, 1);
 			mapInfo.setTile(front.x, front.y, 12);
 			world.rerenderWorld();
-		}),
-		Character.assignX(function(char)
+		})
+	];
+	
+	var clearTile =
+	[
+		Character.customAction(function(char)
 		{
 			var front = world.getFrontOf(char, 1);
 			mapInfo.setTile(front.x, front.y, 0);
 			world.rerenderWorld();
-		}),
+		})
+	];
+	
+	var heroScript =
+	[
+		Character.centerCamera,
+		Character.assignDirectionalControl,
+		Character.assignZ(setTile),
+		Character.assignX(clearTile),
+		Character.assignA([Character.interact])
+	];
+	
+	var boyTalkedToScript =
+	[
+		Interaction.pauseInteractee,
+		Interaction.faceInteractor,
+		Script.showDialog(dialog),
+		Script.speechDialog(dialog, ["Hai desu?"]),
+		Script.hideDialog(dialog),
+		Interaction.resumeInteractee
+	];
+	
+	var boyScript =
+	[
+		Character.assignInteract(boyTalkedToScript),
+		Character.setSlow(64),
+		Character.walkUp,
+		Character.walkUp,
+		Character.walkDown,
+		Character.walkDown,
+		Script.repeat,
 	];
 	
 	var girlScript =
@@ -186,12 +220,13 @@ function startGame()
 	
 	var mainScript =
 	[
+		Script.addCharacter(0,0,0,heroScript),
 		Script.addCharacter(1,5,5,girlScript),
+		Script.addCharacter(3,3,3,boyScript),
 		//Script.showDialog(dialog),
 		//Script.speechDialog(dialog, ["Sie sind das Essen und we sind die Jager", "", "This is the world"]),
 		//Script.speechDialog(dialog, ["She was very nervous"]),
 		Script.hideDialog(dialog),
-		Script.addCharacter(0,0,0,heroScript),
 	];
 	
 	gameState.runScript(mainScript);
