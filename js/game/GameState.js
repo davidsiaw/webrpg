@@ -169,15 +169,32 @@ var Character =
     {
         return function(gameState, next)
 	{
-	    var front = gameState.world.getFrontOf(gameState.currChar);
-            var char = gameState.world.addCharacter(charNum, front.x, front.y);
-	    gameState.world.rotateCharacter(char, gameState.world.getCharacterRotation(gameState.currChar));
-            gameState.characterScript(char, script);
+	    if (gameState.world.getCharacterInFrontOf(gameState.currChar) === undefined)
+	    {
+		var front = gameState.world.getFrontOf(gameState.currChar);
 	    
-	    gameState.characters[char] = new GameCharacter(char);
+		var char = gameState.world.addCharacter(charNum, front.x, front.y);
+		gameState.world.rotateCharacter(char, gameState.world.getCharacterRotation(gameState.currChar));
+		gameState.characterScript(char, script);
+		
+		gameState.characters[char] = new GameCharacter(char);
+	    }
+	    
 	    next();
 	}
-    }, 
+    },
+    
+    setIsFlying: function(gameState, next)
+    {
+	gameState.world.setMobility(gameState.currChar, Passable.Air);
+	next();
+    },
+    
+    setIsNotFlying: function(gameState, next)
+    {
+	gameState.world.setMobility(gameState.currChar, Passable.Ground);
+	next();
+    },
     
     walkForward: function(gameState, next)
     {

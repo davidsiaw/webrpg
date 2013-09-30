@@ -25,7 +25,7 @@ var tileInfo = [];
 tileInfo.push(
 {
 	type: "simple",
-	passable: true,
+	passable: Passable.Air | Passable.Ground,
 	coords:[ {x:32, y:32} ]
 });
 
@@ -88,7 +88,7 @@ tileInfo.push(
 tileInfo.push(
 {
 	type: "autotile12",
-	passable: false,
+	passable: Passable.Air,
 	indexes: [1,2,3,4,5,6,7,8,9,10,11]
 });
 
@@ -176,6 +176,7 @@ function startGame()
 	
 	var fireballScript =
 	[
+		Character.setIsFlying,
 		Character.setSlow(8),
 		Character.walkForward,
 		Character.walkForward,

@@ -1,3 +1,8 @@
+var Passable = {
+	Ground: 0x1,
+	Air: 0x2,
+}
+
 function World(tileset, charset, tileinfo, mapinfo)
 {
 	var w = mapinfo.width;
@@ -142,17 +147,18 @@ function World(tileset, charset, tileinfo, mapinfo)
         
         function canMoveTo(c, x, y)
         {
-		if (x < 0 || x >= w || y < 0 || y >= h)
-		{
-			return false;
-		}
+	    if (x < 0 || x >= w || y < 0 || y >= h)
+	    {
+	    	return false;
+	    }
 		
 	    //console.log(positions[2 + "," + 2])
             var theChar = model.getCharacter(c);
             
-	var tileid = mapinfo.map(x,y);
-	var tile = tileinfo[tileid];
-	    if (!tile.passable)
+	    var tileid = mapinfo.map(x,y);
+	    var tile = tileinfo[tileid];
+	
+	    if ( (tile.passable & theChar.mobility) === 0 )
 	    {
 		return false;
 	    }
@@ -186,11 +192,12 @@ function World(tileset, charset, tileinfo, mapinfo)
 	{
 	    return model;
 	}
-        
+	
         this.addCharacter = function(type,x,y)
         {
             var char = model.addCharacter(type,x,y);
             var c = model.getCharacter(char);
+	    c.mobility = Passable.Ground;
             setOccupant(char, c.tilex, c.tiley); 
             return char;
         }
@@ -199,6 +206,18 @@ function World(tileset, charset, tileinfo, mapinfo)
 		var c = model.getCharacter(char);
 		model.removeCharacter(char);
 		setOccupant(undefined, c.tilex, c.tiley);
+	}
+	
+	this.setMobility = function(char, mob)
+	{
+		var c = model.getCharacter(char);
+		c.mobility = mob;
+	}
+	
+	this.getMobility = function(char, mob)
+	{
+		var c = model.getCharacter(char);
+		return c.mobility;
 	}
         
         this.moveCharacter = model.moveCharacter;
