@@ -165,6 +165,33 @@ var Character =
         });
     },
     
+    spawnCharacterAtFront: function(charNum, script)
+    {
+        return function(gameState, next)
+	{
+	    var front = gameState.world.getFrontOf(gameState.currChar);
+            var char = gameState.world.addCharacter(charNum, front.x, front.y);
+	    gameState.world.rotateCharacter(char, gameState.world.getCharacterRotation(gameState.currChar));
+            gameState.characterScript(char, script);
+	    
+	    gameState.characters[char] = new GameCharacter(char);
+	    next();
+	}
+    }, 
+    
+    walkForward: function(gameState, next)
+    {
+	gameState.world.moveCharacter(gameState.currChar,
+	    gameState.world.getCharacterRotation(gameState.currChar), true, function()
+        {
+            next();
+        },
+	function()
+        {
+            next();
+        });
+    },
+    
     setSlow: function(slowness)
     {
         return function(gameState, next)
@@ -248,6 +275,18 @@ var Character =
 	}
     },
     
+    assignS: function(script)
+    {
+	return function(gameState, next)
+	{
+	    var currActions = gameState.input.getActions();
+	    var currChar = gameState.currChar;
+	    currActions.sActionOnce = function() { gameState.characterScript(currChar, script); };
+	    gameState.input.setActions(currActions);
+	    next();
+	}
+    },
+    
     assignInteract: function(script)
     {
         return function(gameState, next)
@@ -274,6 +313,13 @@ var Character =
 	    func(gameState.currChar);
             next();
         }
+    },
+    
+    die: function(gameState, next)
+    {
+	gameState.world.removeCharacter(gameState.currChar);
+	gameState.characters[gameState.currChar] = undefined;
+	next();
     }
 }
 
@@ -315,6 +361,13 @@ var Interaction =
 	gameState.characters[gameState.interactee].charScriptRunning = true;
 	next();
     },
+    
+    die: function(gameState, next)
+    {
+	gameState.world.removeCharacter(gameState.currChar);
+	gameState.characters[gameState.currChar] = undefined;
+	next();
+    }
 };
 
 var Script =

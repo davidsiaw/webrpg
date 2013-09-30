@@ -79,7 +79,10 @@ function CanvasMapView(x,y,z,w,h,mapModel)
         for(var idx in characters)
         {
             var char = characters[idx];
-                    
+	    
+	    if (char === undefined) {
+		continue;
+	    }
             var left = ((char.x+1/2) * tileSize - char.width/2 - (cameraPos.x) * tileSize) ;
             var top = ((char.y+1) * tileSize - char.height - (cameraPos.y) * tileSize) ;
             

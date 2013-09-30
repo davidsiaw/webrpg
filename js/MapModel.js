@@ -192,6 +192,12 @@ function MapModel(tileset, charset, tileSize, mapfunc)
 		char.direction = direction;
 	}
 	
+	this.getCharacterRotation = function(number)
+	{
+		var char = characters[number];
+		return char.direction;
+	}
+	
 	this.moveCharacter = function(number, direction, autoRotate, onCompleteMovement, onCollide)
 	{
 		onCollide = onCollide || function() { };

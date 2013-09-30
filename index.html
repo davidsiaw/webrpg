@@ -174,13 +174,28 @@ function startGame()
 		})
 	];
 	
+	var fireballScript =
+	[
+		Character.setSlow(8),
+		Character.walkForward,
+		Character.walkForward,
+		Character.walkForward,
+		Character.walkForward,
+		Character.walkForward,
+		Character.walkForward,
+		Character.walkForward,
+		Character.walkForward,
+		Character.die,
+	];
+	
 	var heroScript =
 	[
 		Character.centerCamera,
 		Character.assignDirectionalControl,
 		Character.assignZ(setTile),
 		Character.assignX(clearTile),
-		Character.assignA([Character.interact])
+		Character.assignA([Character.interact]),
+		Character.assignS([Character.spawnCharacterAtFront(5,fireballScript)])
 	];
 	
 	var boyTalkedToScript =
@@ -188,7 +203,7 @@ function startGame()
 		Interaction.pauseInteractee,
 		Interaction.faceInteractor,
 		Script.showDialog(dialog),
-		Script.speechDialog(dialog, ["Hai desu?"]),
+		Script.speechDialog(dialog, ["にょろ〜ん"]),
 		Script.hideDialog(dialog),
 		Interaction.resumeInteractee
 	];

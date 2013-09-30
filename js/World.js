@@ -9,7 +9,7 @@ function World(tileset, charset, tileinfo, mapinfo)
 		[10, 0, 1, 2, 6, 7, 9, 8],
 		[10, 2, 3, 4, 0, 1, 9, 8],
 		[10, 4, 5, 6, 2, 3, 9, 8],
-		[10, 6, 7, 0, 4, 5, 9, 8]	
+		[10, 6, 7, 0, 4, 5, 9, 8]
 	];
 	
 	var corner =
@@ -196,14 +196,16 @@ function World(tileset, charset, tileinfo, mapinfo)
         }
 	
 	this.removeCharacter = function(char) {
-		model.removeCharacter(char);
 		var c = model.getCharacter(char);
+		model.removeCharacter(char);
 		setOccupant(undefined, c.tilex, c.tiley);
 	}
         
         this.moveCharacter = model.moveCharacter;
 	
         this.rotateCharacter = model.rotateCharacter;
+	
+	this.getCharacterRotation = model.getCharacterRotation;
         
         this.teleportCharacter = model.teleportCharacter;
 	
