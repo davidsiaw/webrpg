@@ -169,16 +169,29 @@ var Character =
     {
         return function(gameState, next)
 	{
-	    if (gameState.world.getCharacterInFrontOf(gameState.currChar) === undefined)
-	    {
-		var front = gameState.world.getFrontOf(gameState.currChar);
+	    var front = gameState.world.getFrontOf(gameState.currChar);
+	
+	    var char = gameState.world.addCharacter(charNum, front.x, front.y);
+	    gameState.world.rotateCharacter(char, gameState.world.getCharacterRotation(gameState.currChar));
+	    gameState.characterScript(char, script);
 	    
-		var char = gameState.world.addCharacter(charNum, front.x, front.y);
-		gameState.world.rotateCharacter(char, gameState.world.getCharacterRotation(gameState.currChar));
-		gameState.characterScript(char, script);
-		
-		gameState.characters[char] = new GameCharacter(char);
-	    }
+	    gameState.characters[char] = new GameCharacter(char);
+	    
+	    next();
+	}
+    },
+    
+    spawnProjectileAtFront: function(charNum, script)
+    {
+        return function(gameState, next)
+	{
+	    var front = gameState.world.getFrontOf(gameState.currChar);
+	
+	    var char = gameState.world.addCharacter(charNum, front.x, front.y, CharacterType.Projectile);
+	    gameState.world.rotateCharacter(char, gameState.world.getCharacterRotation(gameState.currChar));
+	    gameState.characterScript(char, script);
+	    
+	    gameState.characters[char] = new GameCharacter(char);
 	    
 	    next();
 	}
@@ -215,6 +228,16 @@ var Character =
         {
             //console.log(slowness)
             gameState.world.setCharacterSlowness(gameState.currChar, slowness);
+            next();
+        }
+    },
+    
+    setOnSomeone: function(script)
+    {
+        return function(gameState, next)
+        {
+            gameState.world.setCharacterGroundInteraction(gameState.currChar,
+							  function(collidee) { });
             next();
         }
     },

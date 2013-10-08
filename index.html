@@ -1,3 +1,4 @@
+<!doctype html>
 <html>
 <head>
 <title>rpg</title>
@@ -178,6 +179,7 @@ function startGame()
 	[
 		Character.setIsFlying,
 		Character.setSlow(8),
+		Character.setOnSomeone(),
 		Character.walkForward,
 		Character.walkForward,
 		Character.walkForward,
@@ -196,7 +198,7 @@ function startGame()
 		Character.assignZ(setTile),
 		Character.assignX(clearTile),
 		Character.assignA([Character.interact]),
-		Character.assignS([Character.spawnCharacterAtFront(5,fireballScript)])
+		Character.assignS([Character.spawnProjectileAtFront(5,fireballScript)])
 	];
 	
 	var boyTalkedToScript =
@@ -249,128 +251,7 @@ function startGame()
 
 }
 
-/*
-
-var hero = world.addCharacter(0,0,0);
-
-for (var i=0; i<11; i++)
-{
-	var hh = world.addCharacter(2,i,5);
-}
-
-for (var i=0; i<11; i++)
-{
-	var hh = world.addCharacter(2,5,i);
-}
-
-var someone = world.addCharacter(1,2,2);
-
-Number.prototype.clamp = function(min, max) {
-  return Math.min(Math.max(this, min), max);
-};
-
-var camera = new MapHeroCamera(map, world.getModel(), hero);
-map.setCamera(camera);
-
-//dialog.setText("Haruhi", "Nagato")
-dialog.hide();
-
-var currow = 0;
-var curcol = 0;
-//dialog.setHighlightBox(dialog.areaGetRow(currow, currow));
-var dialogActions =
-{
-	zActionOnce: function()
-	{
-		input.setActions(walkAroundActions);
-		dialog.hideNextArrow();
-		dialog.hide();
-	},
-	upActionMatic: function()
-	{
-		currow--;
-		currow = currow.clamp(0,1)
-		dialog.setHighlightBox(dialog.areaGetRow(currow, currow));
-	},
-	downActionMatic: function()
-	{
-		currow++;
-		currow = currow.clamp(0,1)
-		dialog.setHighlightBox(dialog.areaGetRow(currow, currow));
-	},
-	leftActionMatic: function()
-	{
-		curcol--;
-		curcol = curcol.clamp(0,17)
-		dialog.setHighlightBox(dialog.areaGetRow(currow, currow));
-	},
-	rightActionMatic: function()
-	{
-		curcol++;
-		curcol = curcol.clamp(0,17)
-		dialog.setHighlightBox(dialog.areaGetRow(currow, currow));
-	}
-}
-
-var walkAroundActions =
-{
-	leftArrowAction: function() { world.moveCharacter(hero, 1); world.rotateCharacter(hero, 1); },
-	rightArrowAction: function() { world.moveCharacter(hero, 2); world.rotateCharacter(hero, 2); },
-	upArrowAction: function() { world.moveCharacter(hero, 3); world.rotateCharacter(hero, 3); },
-	downArrowAction: function() { world.moveCharacter(hero, 0); world.rotateCharacter(hero, 0); },
-	zActionOnce: function()
-	{
-		var char = world.getCharacterInFrontOf(hero);
-		if (char) {
-			input.setActions({});
-			dialog.show();
-			dialog.startWritingText(["【Character " + char + "】", "Hello", "この中に宇宙人、未来人、異世界人、超能力者", "がいたら、あたしのところに来なさい。以上。"], function()
-			{
-				dialog.showNextArrow();
-				input.setActions(dialogActions);
-			});
-			//console.log("meow");
-		}
-	}
-};
-
-input.setActions(walkAroundActions);
-
-
-var movementDirection = 0;
-world.setCharacterSlowness(23, 64);
-
-world.setOnCollide(function(predator, victim)
-{
-	if (movementDirection == 0)
-	{
-		movementDirection = 3;
-	}
-	if (movementDirection == 3)
-	{
-		movementDirection = 0;
-	}
-});
-
-setInterval(function()
-{
-    var pos = world.getCharacterPosition(23);
-    
-    if (pos.y === 4) {
-	movementDirection = 3;
-    }
-    else if (pos.y === 0) {
-	movementDirection = 0;
-    }
-    world.moveCharacter(23, movementDirection, true);
-    
-}, 90)
-
-*/
-
 </script>
-
-
 
 </body>
 </html>

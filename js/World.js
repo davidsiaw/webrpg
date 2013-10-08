@@ -3,6 +3,11 @@ var Passable = {
 	Air: 0x2,
 }
 
+var CharacterType = {
+	Normal: 0,
+	Projectile: 1,
+}
+
 function World(tileset, charset, tileinfo, mapinfo)
 {
 	var w = mapinfo.width;
@@ -123,6 +128,7 @@ function World(tileset, charset, tileinfo, mapinfo)
 	prerender();
 	
         var positions = {};
+	var projectiles = {};
         var tiles = {};
 	var model = new MapModel(prerenderedMap, charset, tileSize, function(x,y)
 	{
@@ -135,14 +141,22 @@ function World(tileset, charset, tileinfo, mapinfo)
 		return undefined;
 	});
 	
-        function setOccupant(c, x, y)
-        {
-            positions[x + "," + y] = c;
+        function setOccupant(c, x, y, type)
+        {   
+	    if (!positions[x + "," + y])
+	    {
+		positions[x + "," + y] = [];
+	    }
+	    
+	    positions[x + "," + y][type] = c;
         }
 	
-        function getOccupant(x, y)
+        function getOccupant(x, y, type)
         {
-            return positions[x + "," + y]
+	    if (positions[x + "," + y] !== undefined) {
+		return positions[x + "," + y][type || CharacterType.Normal];
+	    }
+            return positions[x + "," + y];
         }
         
         function canMoveTo(c, x, y)
@@ -151,24 +165,32 @@ function World(tileset, charset, tileinfo, mapinfo)
 	    {
 	    	return false;
 	    }
-		
 	    //console.log(positions[2 + "," + 2])
             var theChar = model.getCharacter(c);
             
 	    var tileid = mapinfo.map(x,y);
 	    var tile = tileinfo[tileid];
 	
+	    if (theChar.whenCollideWithGround)
+	    {
+		var groundOccupant = getOccupant(x, y, CharacterType.Normal);
+		if ( groundOccupant !== undefined )
+		{
+		    theChar.whenCollideWithGround(groundOccupant);
+		}
+	    }
+	    
 	    if ( (tile.passable & theChar.mobility) === 0 )
 	    {
 		return false;
 	    }
 	    
-            if (getOccupant(x, y) === undefined)
+            if (getOccupant(x, y, theChar.type) === undefined)
             {
                 return true;
             }
             
-            if (getOccupant(x, y) !== c)
+            if (getOccupant(x, y, theChar.type) !== c)
             {
                 return false;
             }
@@ -180,8 +202,8 @@ function World(tileset, charset, tileinfo, mapinfo)
 	{
             //console.log(x + "," + y)
             var theChar = model.getCharacter(c);
-            setOccupant(undefined,theChar.tilex,theChar.tiley)
-            setOccupant(c, x, y);
+            setOccupant(undefined,theChar.tilex,theChar.tiley,theChar.type)
+            setOccupant(c, x, y, theChar.type);
         }
         
         model.setCanMoveToFunc(canMoveTo);
@@ -193,19 +215,32 @@ function World(tileset, charset, tileinfo, mapinfo)
 	    return model;
 	}
 	
-        this.addCharacter = function(type,x,y)
+        this.addCharacter = function(type,x,y,chartype)
         {
             var char = model.addCharacter(type,x,y);
             var c = model.getCharacter(char);
 	    c.mobility = Passable.Ground;
-            setOccupant(char, c.tilex, c.tiley); 
+	    c.type = chartype || CharacterType.Normal;
+            setOccupant(char, c.tilex, c.tiley, c.type); 
             return char;
         }
 	
 	this.removeCharacter = function(char) {
 		var c = model.getCharacter(char);
 		model.removeCharacter(char);
-		setOccupant(undefined, c.tilex, c.tiley);
+		setOccupant(undefined, c.tilex, c.tiley, c.type);
+	}
+	
+	this.setType = function(char, type)
+	{
+		var c = model.getCharacter(type);
+		c.type = type;
+	}
+	
+	this.getType = function(char)
+	{
+		var c = model.getCharacter(char);
+		return c.type;
 	}
 	
 	this.setMobility = function(char, mob)
@@ -249,6 +284,18 @@ function World(tileset, charset, tileinfo, mapinfo)
 	{
 		var char = model.getCharacter(number);
 		return char.slowness;
+	}
+	
+	this.setCharacterGroundInteraction = function(number, whatToDo)
+	{
+		var char = model.getCharacter(number);
+		char.whenCollideWithGround = whatToDo;
+	}
+	
+	this.getCharacterGroundInteraction = function(number, whatToDo)
+	{
+		var char = model.getCharacter(number);
+		return char.whenCollideWithGround;
 	}
 	
 	this.getFrontOf = model.getFrontTile;
