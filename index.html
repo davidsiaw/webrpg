@@ -241,8 +241,11 @@ function startGame()
 		Script.addCharacter(0,0,0,heroScript),
 		Script.addCharacter(1,5,5,girlScript),
 		Script.addCharacter(3,3,3,boyScript),
-		//Script.showDialog(dialog),
-		//Script.speechDialog(dialog, ["Sie sind das Essen und we sind die Jager", "", "This is the world"]),
+		Script.showDialog(dialog),
+		Script.speechDialog(dialog, [
+			"Sie sind das Essen und we sind die Jager", 
+			"HAH HAH HAH", 
+			"HAHA"]),
 		//Script.speechDialog(dialog, ["She was very nervous"]),
 		Script.hideDialog(dialog),
 	];
