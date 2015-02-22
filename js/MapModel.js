@@ -1,4 +1,4 @@
-function MapModel(tileset, charset, tileSize, mapfunc)
+function MapModel(prerenderedMap, charset, tileSize, mapfunc)
 {
 	// constants
 	var self = this;
@@ -11,9 +11,9 @@ function MapModel(tileset, charset, tileSize, mapfunc)
 		return tileSize;
 	}
 	
-	this.getImage = function()
+	this.getPrerenderedMap = function()
 	{
-		return tileset
+		return prerenderedMap;
 	}
 	
 	this.getTileOffset = mapfunc;

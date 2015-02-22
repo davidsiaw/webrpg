@@ -21,76 +21,65 @@
 
 <script type="text/javascript">
 
+function pushAnimatedTile(tileInfo, x, y, animSpacingX)
+{
+	var coords = [];
+
+	for (var i=0; i<4; i++)
+	{
+		coords.push({x: x + animSpacingX * i, y: y});
+	}
+
+	tileInfo.push(
+	{
+		type: "simple",
+		coords: coords
+	});
+}
+
+function pushAutotile(tinfo, tileSize, offsetX, offsetY)
+{
+
+	var tileIndex = tinfo.length;
+
+	pushAnimatedTile(tinfo, (2+offsetX)*tileSize, (1+offsetY)*tileSize, 3*tileSize);
+	pushAnimatedTile(tinfo, (2+offsetX)*tileSize, (2+offsetY)*tileSize, 3*tileSize);
+	pushAnimatedTile(tinfo, (2+offsetX)*tileSize, (3+offsetY)*tileSize, 3*tileSize);
+	pushAnimatedTile(tinfo, (1+offsetX)*tileSize, (3+offsetY)*tileSize, 3*tileSize);
+	pushAnimatedTile(tinfo, (0+offsetX)*tileSize, (3+offsetY)*tileSize, 3*tileSize);
+	pushAnimatedTile(tinfo, (0+offsetX)*tileSize, (2+offsetY)*tileSize, 3*tileSize);
+	pushAnimatedTile(tinfo, (0+offsetX)*tileSize, (1+offsetY)*tileSize, 3*tileSize);
+	pushAnimatedTile(tinfo, (1+offsetX)*tileSize, (1+offsetY)*tileSize, 3*tileSize);
+	pushAnimatedTile(tinfo, (1+offsetX)*tileSize, (2+offsetY)*tileSize, 3*tileSize);
+	pushAnimatedTile(tinfo, (2+offsetX)*tileSize, (0+offsetY)*tileSize, 3*tileSize);
+	pushAnimatedTile(tinfo, (0+offsetX)*tileSize, (0+offsetY)*tileSize, 3*tileSize);
+
+	var indexes =[]
+	for (var i=0;i<12;i++)
+	{
+		indexes.push(i+tileIndex);
+	}
+
+	tileInfo.push(
+	{
+		type: "autotile12",
+		passable: Passable.Air,
+		indexes: indexes
+	});
+}
+
 var tileInfo = [];
+
 tileInfo.push(
 {
 	type: "simple",
 	passable: Passable.Air | Passable.Ground,
-	coords:[ {x:32, y:32} ]
+	coords:[ {x:48, y:0} ]
 });
 
-tileInfo.push(
-{
-	type: "simple",
-	coords:[ {x:64, y:64} ]
-});
-tileInfo.push(
-{
-	type: "simple",
-	coords:[ {x:64, y:96} ]
-});
-tileInfo.push(
-{
-	type: "simple",
-	coords:[ {x:64, y:128} ]
-});
-tileInfo.push(
-{
-	type: "simple",
-	coords:[ {x:32, y:128} ]
-});
-tileInfo.push(
-{
-	type: "simple",
-	coords:[ {x:0, y:128} ]
-});
-tileInfo.push(
-{
-	type: "simple",
-	coords:[ {x:0, y:96} ]
-});
-tileInfo.push(
-{
-	type: "simple",
-	coords:[ {x:0, y:64} ]
-});
-tileInfo.push(
-{
-	type: "simple",
-	coords:[ {x:32, y:64} ]
-});
-tileInfo.push(
-{
-	type: "simple",
-	coords:[ {x:32, y:96} ]
-});
-tileInfo.push(
-{
-	type: "simple",
-	coords:[ {x:64, y:32} ]
-});
-tileInfo.push(
-{
-	type: "simple",
-	coords:[ {x:0, y:32} ]
-});
+pushAutotile(tileInfo, 48, 0, 0);
 
-tileInfo.push(
-{
-	type: "autotile12",
-	passable: Passable.Air,
-	indexes: [1,2,3,4,5,6,7,8,9,10,11]
-});
+
 
 function Map(w,h)
 {
@@ -126,7 +115,7 @@ var tilesetImg = new Image();
 charImg.src = "res/output.png";
 charImg.onload = function ()
 {
-	tilesetImg.src = "res/tiles0.png";
+	tilesetImg.src = "res/grass.png";
 	tilesetImg.onload = function()
 	{
 		startGame();
@@ -146,11 +135,21 @@ function startGame()
 	
 	var gameState = new GameState(input, world, map);
 	
+	var lastUpdateTime = new Date();
+
 	setInterval(function()
 	{
+	    var timeBetween = new Date() - lastUpdateTime;
+	    if (timeBetween > 200)
+	    {
+	    	// 200ms updates
+			lastUpdateTime = new Date();
+	    }
+
 		input.checkInputs();
 		dialog.update();
 		map.update();
+
 		
 	}, 16)
 	
@@ -204,7 +203,7 @@ function startGame()
 		Interaction.pauseInteractee,
 		Interaction.faceInteractor,
 		Script.showDialog(dialog),
-		Script.speechDialog(dialog, ["にょろ〜ん"]),
+		Script.speechDialog(dialog, ["宇宙からの愛のエネルギーを", "胸が痛いほどに感じています"]),
 		Script.hideDialog(dialog),
 		Interaction.resumeInteractee
 	];
@@ -238,7 +237,9 @@ function startGame()
 	[
 		Script.addCharacter(0,0,0,heroScript),
 		Script.addCharacter(1,5,5,girlScript),
-		Script.addCharacter(3,3,3,boyScript),
+		Script.addCharacter(3,13,13,boyScript),
+		Script.addCharacter(2,19,13,[]),
+		Script.addCharacter(4,17,18,[]),
 		//Script.showDialog(dialog),
 		//Script.speechDialog(dialog, ["Sie sind das Essen und we sind die Jager", "", "This is the world"]),
 		//Script.speechDialog(dialog, ["She was very nervous"]),

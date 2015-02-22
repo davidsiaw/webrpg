@@ -18,7 +18,7 @@ function CanvasMapView(x,y,z,w,h,mapModel)
     var tilesPerWidth = w / tileSize + 2;
     var tilesPerHeight = h / tileSize + 2;
     
-    var tileSetImg = new Image();
+    var prerenderedMap = {};
     var charSetImg = new Image();
     
     this.setCamera = function(cam)
@@ -32,9 +32,13 @@ function CanvasMapView(x,y,z,w,h,mapModel)
     
     function update()
     {
-	var timeBetween = new Date() - lastUpdateTime;
+        var now = new Date();
+	    var timeBetween = now - lastUpdateTime;
         //console.log(timeBetween);
         mapModel.advanceTime(timeBetween);
+
+        var millisecond = now.getTime();
+        var tileAnimTick = Math.floor(millisecond / 200);
         
         var cameraPos = camera.getLocation();
 	
@@ -42,33 +46,51 @@ function CanvasMapView(x,y,z,w,h,mapModel)
         {
             for (var x = 0; x < tilesPerWidth; x++)
             {
-		var texcoord = mapModel.getTileOffset(cameraPos.x+x,cameraPos.y+y);
-	    
-		var biasedFracY = (cameraPos.y + tileSize * h) % 1;
-		var biasedFracX = (cameraPos.x + tileSize * w) % 1;
-		
-		var top = ((y - biasedFracY) * tileSize);
-		var left = ((x - biasedFracX) * tileSize);
-		
-		if (!texcoord)
-		{
-		    context.fillStyle = "#000";
-		    context.fillRect(left, top, tileSize, tileSize);
-		}
-		else
-		{
-		    context.drawImage(
-				      tileSetImg,
-				      texcoord.x,
-				      texcoord.y,
-				      tileSize,
-				      tileSize,
-				      
-				      left,
-				      top,
-				      tileSize,
-				      tileSize);
-		}
+        		var texcoord = mapModel.getTileOffset(cameraPos.x+x,cameraPos.y+y);
+        	    
+        		var biasedFracY = (cameraPos.y + tileSize * h) % 1;
+        		var biasedFracX = (cameraPos.x + tileSize * w) % 1;
+        		
+        		var top = ((y - biasedFracY) * tileSize);
+        		var left = ((x - biasedFracX) * tileSize);
+        		
+        		if (!texcoord)
+        		{
+        		    context.fillStyle = "#000";
+        		    context.fillRect(left, top, tileSize, tileSize);
+        		}
+        		else
+        		{
+                    var item = prerenderedMap[":" + Math.floor(cameraPos.x + x) + "," + Math.floor(cameraPos.y + y)];
+                    if (item) 
+                    {
+                        for (var i=0; i<item.parts.length; i++)
+                        {
+                            var animLength = item.parts[i].coords.length;
+                            context.drawImage(
+                                      item.tileSet,
+                                      item.parts[i].coords[tileAnimTick % animLength].x + item.parts[i].dx,
+                                      item.parts[i].coords[tileAnimTick % animLength].y + item.parts[i].dy,
+                                      item.parts[i].size,
+                                      item.parts[i].size,
+                                      left + item.parts[i].dx,
+                                      top + item.parts[i].dy,
+                                      item.parts[i].size,
+                                      item.parts[i].size);
+                        }
+                    }
+
+        		    /*context.drawImage(
+        				      tileSetImg,
+        				      texcoord.x,
+        				      texcoord.y,
+        				      tileSize,
+        				      tileSize,
+        				      left,
+        				      top,
+        				      tileSize,
+        				      tileSize);*/
+        		}
             }
         }
             
@@ -80,9 +102,9 @@ function CanvasMapView(x,y,z,w,h,mapModel)
         {
             var char = characters[idx];
 	    
-	    if (char === undefined) {
-		continue;
-	    }
+    	    if (char === undefined) {
+    		  continue;
+    	    }
             var left = ((char.x+1/2) * tileSize - char.width/2 - (cameraPos.x) * tileSize) ;
             var top = ((char.y+1) * tileSize - char.height - (cameraPos.y) * tileSize) ;
             
@@ -94,7 +116,7 @@ function CanvasMapView(x,y,z,w,h,mapModel)
     
     var loaded = false;
     
-    tileSetImg = mapModel.getImage();
+    prerenderedMap = mapModel.getPrerenderedMap();
     charSetImg = mapModel.getCharacterImage();
     
     this.getRectangle = function()
@@ -109,10 +131,10 @@ function CanvasMapView(x,y,z,w,h,mapModel)
     
     this.update = function()
     {
-	if (!loaded) {
-	    return;
-	}
-	update();
+    	if (!loaded) {
+    	    return;
+    	}
+    	update();
     }
     
     this.setHasBorder = function(yes)
