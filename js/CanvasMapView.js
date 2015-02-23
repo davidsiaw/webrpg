@@ -14,7 +14,9 @@ function CanvasMapView(x,y,z,w,h,mapModel)
     canvas.style.left = x+"px";
     canvas.style.top = y+"px";
     canvas.style.zIndex = z;
-    
+
+    var charShift = -16;
+
     var tilesPerWidth = w / tileSize + 2;
     var tilesPerHeight = h / tileSize + 2;
     
@@ -108,7 +110,7 @@ function CanvasMapView(x,y,z,w,h,mapModel)
             var left = ((char.x+1/2) * tileSize - char.width/2 - (cameraPos.x) * tileSize) ;
             var top = ((char.y+1) * tileSize - char.height - (cameraPos.y) * tileSize) ;
             
-            context.drawImage(charSetImg,char.offsetx,char.offsety,char.width,char.height,left,top,char.width,char.height);
+            context.drawImage(charSetImg,char.offsetx,char.offsety,char.width,char.height,left,top + charShift,char.width,char.height);
         }
         
         lastUpdateTime = new Date();
