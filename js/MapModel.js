@@ -33,19 +33,19 @@ function MapModel(prerenderedMap, charset, tileSize, mapfunc)
 		var dir = {dx:0, dy:0};
 		if(direction == 0)
 		{
-			dir.dy = 1;
+			dir.dy = -1;
 		}
 		if(direction == 1)
 		{
-			dir.dx = -1;
+			dir.dx = 1;
 		}
 		if(direction == 2)
 		{
-			dir.dx = 1;
+			dir.dy = 1;
 		}
 		if(direction == 3)
 		{
-			dir.dy = -1;
+			dir.dx = -1;
 		}
 		return dir;
 	}
@@ -162,15 +162,15 @@ function MapModel(prerenderedMap, charset, tileSize, mapfunc)
 		characters.push(
 			{
 				id: characters.length,
-				width: 32,
-				height: 48,
+				width: 48,
+				height: 64,
 				tilex: x,
 				tiley: y,
 				x: x,
 				y: y,
 				offsetx: 0,
 				offsety: 0,
-				baseoffsetx: typeid * 128,
+				baseoffsetx: typeid * 192,
 				dx: 0,
 				dy: 0,
 				direction: 0,
@@ -188,7 +188,7 @@ function MapModel(prerenderedMap, charset, tileSize, mapfunc)
 	this.rotateCharacter = function(number, direction)
 	{
 		var char = characters[number];
-		char.offsety = direction * 48;
+		char.offsety = direction * 64;
 		char.direction = direction;
 	}
 	

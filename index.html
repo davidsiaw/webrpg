@@ -195,7 +195,7 @@ function startGame()
 		Character.assignZ(setTile),
 		Character.assignX(clearTile),
 		Character.assignA([Character.interact]),
-		Character.assignS([Character.spawnCharacterAtFront(5,fireballScript)])
+		Character.assignS([Character.spawnCharacterAtFront(2,fireballScript)])
 	];
 	
 	var boyTalkedToScript =
@@ -235,11 +235,13 @@ function startGame()
 	
 	var mainScript =
 	[
-		Script.addCharacter(0,0,0,heroScript),
-		Script.addCharacter(1,5,5,girlScript),
-		Script.addCharacter(3,13,13,boyScript),
-		Script.addCharacter(2,19,13,[]),
-		Script.addCharacter(4,17,18,[]),
+		Script.addCharacter(5,0,0,heroScript),
+		//Script.addCharacter(1,5,5,girlScript),
+		//Script.addCharacter(3,13,13,boyScript),
+		Script.addCharacter(1,5,5,[Character.walkDown]),
+		Script.addCharacter(3,6,5,[Character.walkDown]),
+		Script.addCharacter(7,7,5,[Character.walkDown]),
+		Script.addCharacter(4,8,5,[Character.walkDown]),
 		//Script.showDialog(dialog),
 		//Script.speechDialog(dialog, ["Sie sind das Essen und we sind die Jager", "", "This is the world"]),
 		//Script.speechDialog(dialog, ["She was very nervous"]),

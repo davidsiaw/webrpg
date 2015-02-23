@@ -16,48 +16,48 @@ function SimpleInput() {
     
     this.checkInputs = function()
     {
-	if (keyb.getKey(LEFT_ARROW_KEY) && leftArrowAction)
-	{
+    	if (keyb.getKey(LEFT_ARROW_KEY) && leftArrowAction)
+    	{
             leftArrowAction();
-	}
+    	}
         else if (keyb.getKey(RIGHT_ARROW_KEY) && rightArrowAction)
-	{
+    	{
             rightArrowAction();
-	}
-	if (keyb.getKey(UP_ARROW_KEY) && upArrowAction)
-	{
+    	}
+    	if (keyb.getKey(UP_ARROW_KEY) && upArrowAction)
+    	{
             upArrowAction();
-	}
-	else if (keyb.getKey(DOWN_ARROW_KEY) && downArrowAction)
-	{
+    	}
+    	else if (keyb.getKey(DOWN_ARROW_KEY) && downArrowAction)
+    	{
             downArrowAction();
-	}
-	if (keyb.getKey(A_KEY) && aAction)
+    	}
+    	if (keyb.getKey(A_KEY) && aAction)
         {
             aAction();
-	}
-	if (keyb.getKey(S_KEY) && sAction)
+    	}
+    	if (keyb.getKey(S_KEY) && sAction)
         {
             sAction();
-	}
-	if (keyb.getKey(Z_KEY) && zAction)
+    	}
+    	if (keyb.getKey(Z_KEY) && zAction)
         {
             zAction();
-	}
-	if (keyb.getKey(X_KEY) && xAction)
+    	}
+    	if (keyb.getKey(X_KEY) && xAction)
         {
             xAction();
-	}
+    	}
     }
     
     this.getActions = function()
     {
-	return currActions;
+	   return currActions;
     }
     
     this.setActions = function(inputs)
     {
-	currActions = inputs;
+        currActions = inputs;
 	
         leftArrowAction = inputs.leftArrowAction;
         rightArrowAction = inputs.rightArrowAction;

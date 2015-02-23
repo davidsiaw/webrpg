@@ -119,7 +119,7 @@ var Character =
 {
     walkLeft: function(gameState, next)
     {
-        gameState.world.moveCharacter(gameState.currChar, 1, true, function()
+        gameState.world.moveCharacter(gameState.currChar, 3, true, function()
         {
             next();
         },
@@ -131,7 +131,7 @@ var Character =
     
     walkRight: function(gameState, next)
     {
-        gameState.world.moveCharacter(gameState.currChar, 2, true, function()
+        gameState.world.moveCharacter(gameState.currChar, 1, true, function()
         {
             next();
         },
@@ -143,7 +143,7 @@ var Character =
     
     walkUp: function(gameState, next)
     {
-        gameState.world.moveCharacter(gameState.currChar, 3, true, function()
+        gameState.world.moveCharacter(gameState.currChar, 0, true, function()
         {
             next();
         },
@@ -155,7 +155,7 @@ var Character =
     
     walkDown: function(gameState, next)
     {
-        gameState.world.moveCharacter(gameState.currChar, 0, true, function()
+        gameState.world.moveCharacter(gameState.currChar, 2, true, function()
         {
             next();
         },
@@ -168,42 +168,42 @@ var Character =
     spawnCharacterAtFront: function(charNum, script)
     {
         return function(gameState, next)
-	{
-	    if (gameState.world.getCharacterInFrontOf(gameState.currChar) === undefined)
-	    {
-		var front = gameState.world.getFrontOf(gameState.currChar);
-	    
-		var char = gameState.world.addCharacter(charNum, front.x, front.y);
-		gameState.world.rotateCharacter(char, gameState.world.getCharacterRotation(gameState.currChar));
-		gameState.characterScript(char, script);
-		
-		gameState.characters[char] = new GameCharacter(char);
-	    }
-	    
-	    next();
-	}
+    	{
+    	    if (gameState.world.getCharacterInFrontOf(gameState.currChar) === undefined)
+    	    {
+        		var front = gameState.world.getFrontOf(gameState.currChar);
+        	    
+        		var char = gameState.world.addCharacter(charNum, front.x, front.y);
+        		gameState.world.rotateCharacter(char, gameState.world.getCharacterRotation(gameState.currChar));
+        		gameState.characterScript(char, script);
+        		
+        		gameState.characters[char] = new GameCharacter(char);
+    	    }
+    	    
+    	    next();
+    	}
     },
     
     setIsFlying: function(gameState, next)
     {
-	gameState.world.setMobility(gameState.currChar, Passable.Air);
-	next();
+    	gameState.world.setMobility(gameState.currChar, Passable.Air);
+    	next();
     },
     
     setIsNotFlying: function(gameState, next)
     {
-	gameState.world.setMobility(gameState.currChar, Passable.Ground);
-	next();
+    	gameState.world.setMobility(gameState.currChar, Passable.Ground);
+    	next();
     },
     
     walkForward: function(gameState, next)
     {
-	gameState.world.moveCharacter(gameState.currChar,
+        gameState.world.moveCharacter(gameState.currChar,
 	    gameState.world.getCharacterRotation(gameState.currChar), true, function()
         {
             next();
         },
-	function()
+        function()
         {
             next();
         });
@@ -233,23 +233,23 @@ var Character =
 	{
 		this.leftArrowAction = function()
 		{
-		    gameState.world.moveCharacter(theChar, 1);
-		    gameState.world.rotateCharacter(theChar, 1);
-		};
-		this.rightArrowAction = function()
-		{
-		    gameState.world.moveCharacter(theChar, 2);
-		    gameState.world.rotateCharacter(theChar, 2);
-		};
-		this.upArrowAction = function()
-		{
 		    gameState.world.moveCharacter(theChar, 3);
 		    gameState.world.rotateCharacter(theChar, 3);
 		};
-		this.downArrowAction = function()
+		this.rightArrowAction = function()
+		{
+		    gameState.world.moveCharacter(theChar, 1);
+		    gameState.world.rotateCharacter(theChar, 1);
+		};
+		this.upArrowAction = function()
 		{
 		    gameState.world.moveCharacter(theChar, 0);
 		    gameState.world.rotateCharacter(theChar, 0);
+		};
+		this.downArrowAction = function()
+		{
+		    gameState.world.moveCharacter(theChar, 2);
+		    gameState.world.rotateCharacter(theChar, 2);
 		};
 	}
 	gameState.input.setActions(new walkAroundActions(gameState.currChar));
@@ -349,19 +349,19 @@ var Interaction =
 	var interacteePos = world.getCharacterPosition(gameState.interactee);
 	
 	if (interactorPos.x < interacteePos.x) {
-	    world.rotateCharacter(gameState.interactee, 1);
-	}
-	
-	if (interactorPos.x > interacteePos.x) {
-	    world.rotateCharacter(gameState.interactee, 2);
-	}
-	
-	if (interactorPos.y < interacteePos.y) {
 	    world.rotateCharacter(gameState.interactee, 3);
 	}
 	
-	if (interactorPos.y > interacteePos.y) {
+	if (interactorPos.x > interacteePos.x) {
+	    world.rotateCharacter(gameState.interactee, 1);
+	}
+	
+	if (interactorPos.y < interacteePos.y) {
 	    world.rotateCharacter(gameState.interactee, 0);
+	}
+	
+	if (interactorPos.y > interacteePos.y) {
+	    world.rotateCharacter(gameState.interactee, 2);
 	}
 	
 	next();
@@ -454,7 +454,7 @@ var Script =
         {
             var char = gameState.world.addCharacter(charNum, x, y);
             gameState.characterScript(char, script);
-	    gameState.characters[char] = new GameCharacter(char);
+	        gameState.characters[char] = new GameCharacter(char);
             next();
         }
     },
@@ -464,7 +464,7 @@ var Script =
         return function(gameState, next)
         {
             gameState.world.removeCharacter(charNum);
-	    gameState.characters[charNum] = undefined;
+	        gameState.characters[charNum] = undefined;
             next();
         }
     },
