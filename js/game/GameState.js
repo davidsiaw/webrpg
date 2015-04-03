@@ -18,97 +18,113 @@ function GameState(input, world, map)
     this.map = map;
     this.characters = {};
     
-    this.interactionScripts = {};
+    this.runScripts = {};
     
     this.currChar = undefined;
     
     this.repeat = false;
-    
-    this.runScript = function(script)
+
+    this.label = false;
+    this.goto = false;
+
+    this.collisionScript = {};
+
+    this.collide = function(curr, other, onEnd)
     {
-        var cur = 0;
-        function invoke()
-	{
-            if (self.repeat)
-	    {
-                cur = 0;
-                self.repeat = false;
-            }
-            if (cur >= script.length)
-	    {
-                return;
-            }
-            setTimeout(function() { script[cur++](self, invoke) },0);
+        if (self.collisionScript[curr] !== undefined)
+        {
+            self.runScript(self.collisionScript[curr], curr, other, onEnd);
         }
-        
-        invoke();
+
+        if (self.collisionScript[other] !== undefined)
+        {
+            self.runScript(self.collisionScript[other], curr, other, onEnd);
+        }
     }
-    
-    this.characterScript = function(character, script)
+
+    this.runScript = function(script, interactor, interactee, onEnd)
     {
+        var labels = {};
         var cur = 0;
+
+        var strippedScript = [];
+        var i=0;
+        for (i=0; i<script.length; i++)
+        {
+            if (typeof script[i] === "string")
+            {
+                labels[script[i]] = i;
+                strippedScript.push(Script.nop);
+            }
+            else
+            {
+                strippedScript.push(script[i]);
+            }
+        }
+
+        script = strippedScript;
+
         function invoke()
-	{
-            if (self.repeat)
 	    {
+            if (self.label)
+            {
+                labels[self.label] = cur;
+                self.label = false;
+            }
+
+            if (self.goto)
+            {
+                if (labels[self.goto])
+                {
+                    cur = labels[self.goto];
+                }
+                else
+                {
+                    console.log("Unknown label: " + self.goto);
+                }
+                self.goto = false;
+            }
+
+            if (self.repeat)
+	        {
                 cur = 0;
                 self.repeat = false;
             }
+
             if (cur >= script.length)
-	    {
+	        {
+                if (onEnd)
+                {
+                    onEnd();
+                }
+
                 return;
             }
 	    
-	    self.currChar = character;
-	    function resume(args)
-	    {
-		if (self.characters[character] && self.characters[character].charScriptRunning)
-		{
-		    setTimeout(function()
-		    {
-			self.currChar = character;
-			script[cur++](self, invoke)
-		    },0);
-		}
-		else
-		{
-		    setTimeout(function()
-		    {
-			resume();
-		    },0);
-		}
-	    }
+    	    self.currChar = interactor;
+    	    self.interactee = interactee;
+
+            function resume(args)
+            {
+                if (!interactor || (self.characters[interactor] && self.characters[interactor].charScriptRunning))
+                {
+                    setTimeout(function()
+                    {
+                        self.currChar = interactor;
+                        self.interactee = interactee;
+                        script[cur++](self, invoke)
+                    }, 0);
+                }
+                else
+                {
+                    setTimeout(function()
+                    {
+                        resume();
+                    }, 100);
+                }
+            }
             
-	    resume();
-        }
-        
-        invoke();
-    }
-    
-    this.interactionScript = function(interactor, interactee, script)
-    {
-        var cur = 0;
-        function invoke()
-	{
-            if (self.repeat)
-	    {
-                cur = 0;
-                self.repeat = false;
-            }
-            if (cur >= script.length)
-	    {
-                return;
-            }
-	    
-	    self.interactor = interactor;
-	    self.interactee = interactee;
-	    
-	    setTimeout(function()
-	    {
-		self.interactor = interactor;
-		self.interactee = interactee;
-		script[cur++](self, invoke)
-	    },0);
+            resume();
         }
         
         invoke();
@@ -123,9 +139,9 @@ var Character =
         {
             next();
         },
-	function()
+	    function(other)
         {
-            next();
+            gameState.collide(gameState.currChar, other, next);
         });
     },
     
@@ -135,9 +151,9 @@ var Character =
         {
             next();
         },
-	function()
+	    function(other)
         {
-            next();
+            gameState.collide(gameState.currChar, other, next);
         });
     },
     
@@ -147,9 +163,9 @@ var Character =
         {
             next();
         },
-	function()
+	    function(other)
         {
-            next();
+            gameState.collide(gameState.currChar, other, next);
         });
     },
     
@@ -159,9 +175,9 @@ var Character =
         {
             next();
         },
-	function()
+	    function(other)
         {
-            next();
+            gameState.collide(gameState.currChar, other, next);
         });
     },
     
@@ -175,7 +191,7 @@ var Character =
         	    
         		var char = gameState.world.addCharacter(charNum, front.x, front.y);
         		gameState.world.rotateCharacter(char, gameState.world.getCharacterRotation(gameState.currChar));
-        		gameState.characterScript(char, script);
+        		gameState.runScript(script, char);
         		
         		gameState.characters[char] = new GameCharacter(char);
     	    }
@@ -221,122 +237,151 @@ var Character =
     
     centerCamera: function(gameState, next)
     {
-	//console.log(slowness)
-	var camera = new MapHeroCamera(gameState.map, gameState.world.getModel(), gameState.currChar);
-	gameState.map.setCamera(camera);
-	next();
+    	//console.log(slowness)
+    	var camera = new MapHeroCamera(gameState.map, gameState.world.getModel(), gameState.currChar);
+    	gameState.map.setCamera(camera);
+    	next();
     },
     
     assignDirectionalControl: function(gameState, next)
     {
-	function walkAroundActions(theChar)
-	{
-		this.leftArrowAction = function()
-		{
-		    gameState.world.moveCharacter(theChar, 3);
-		    gameState.world.rotateCharacter(theChar, 3);
-		};
-		this.rightArrowAction = function()
-		{
-		    gameState.world.moveCharacter(theChar, 1);
-		    gameState.world.rotateCharacter(theChar, 1);
-		};
-		this.upArrowAction = function()
-		{
-		    gameState.world.moveCharacter(theChar, 0);
-		    gameState.world.rotateCharacter(theChar, 0);
-		};
-		this.downArrowAction = function()
-		{
-		    gameState.world.moveCharacter(theChar, 2);
-		    gameState.world.rotateCharacter(theChar, 2);
-		};
-	}
-	gameState.input.setActions(new walkAroundActions(gameState.currChar));
-	next();
+    	function walkAroundActions(theChar)
+    	{
+    		this.leftArrowAction = function()
+    		{
+    		    gameState.world.moveCharacter(theChar, 3);
+    		    gameState.world.rotateCharacter(theChar, 3);
+    		};
+    		this.rightArrowAction = function()
+    		{
+    		    gameState.world.moveCharacter(theChar, 1);
+    		    gameState.world.rotateCharacter(theChar, 1);
+    		};
+    		this.upArrowAction = function()
+    		{
+    		    gameState.world.moveCharacter(theChar, 0);
+    		    gameState.world.rotateCharacter(theChar, 0);
+    		};
+    		this.downArrowAction = function()
+    		{
+    		    gameState.world.moveCharacter(theChar, 2);
+    		    gameState.world.rotateCharacter(theChar, 2);
+    		};
+    	}
+    	gameState.input.setActions(new walkAroundActions(gameState.currChar));
+    	next();
     },
 
     assignZ: function(script)
     {
-	return function(gameState, next)
-	{
-	    var currActions = gameState.input.getActions();
-	    var currChar = gameState.currChar;
-	    currActions.zActionOnce = function() { gameState.characterScript(currChar, script); };
-	    gameState.input.setActions(currActions);
-	    next();
-	}
+    	return function(gameState, next)
+    	{
+    	    var currActions = gameState.input.getActions();
+    	    var currChar = gameState.currChar;
+    	    currActions.zActionOnce = function() { gameState.runScript(script, currChar); };
+    	    gameState.input.setActions(currActions);
+    	    next();
+    	}
     },
     
     assignX: function(script)
     {
-	return function(gameState, next)
-	{
-	    var currActions = gameState.input.getActions();
-	    var currChar = gameState.currChar;
-	    currActions.xActionOnce = function() { gameState.characterScript(currChar, script); };
-	    gameState.input.setActions(currActions);
-	    next();
-	}
+    	return function(gameState, next)
+    	{
+    	    var currActions = gameState.input.getActions();
+    	    var currChar = gameState.currChar;
+    	    currActions.xActionOnce = function() { gameState.runScript(script, currChar); };
+    	    gameState.input.setActions(currActions);
+    	    next();
+    	}
     },
     
     assignA: function(script)
     {
-	return function(gameState, next)
-	{
-	    var currActions = gameState.input.getActions();
-	    var currChar = gameState.currChar;
-	    currActions.aActionOnce = function() { gameState.characterScript(currChar, script); };
-	    gameState.input.setActions(currActions);
-	    next();
-	}
+    	return function(gameState, next)
+    	{
+    	    var currActions = gameState.input.getActions();
+    	    var currChar = gameState.currChar;
+    	    currActions.aActionOnce = function() { gameState.runScript(script, currChar); };
+    	    gameState.input.setActions(currActions);
+    	    next();
+    	}
     },
     
     assignS: function(script)
     {
-	return function(gameState, next)
-	{
-	    var currActions = gameState.input.getActions();
-	    var currChar = gameState.currChar;
-	    currActions.sActionOnce = function() { gameState.characterScript(currChar, script); };
-	    gameState.input.setActions(currActions);
-	    next();
-	}
+    	return function(gameState, next)
+    	{
+    	    var currActions = gameState.input.getActions();
+    	    var currChar = gameState.currChar;
+    	    currActions.sActionOnce = function() { gameState.runScript(script, currChar); };
+    	    gameState.input.setActions(currActions);
+    	    next();
+    	}
     },
     
     assignInteract: function(script)
     {
         return function(gameState, next)
         {
-	    gameState.interactionScripts[gameState.currChar] = script;
-	    next();
+    	    gameState.runScripts[gameState.currChar] = script;
+    	    next();
+        }
+    },
+
+    assignCollide: function(script)
+    {
+        return function(gameState, next)
+        {
+            gameState.collisionScript[gameState.currChar] = script;
+            next();
         }
     },
     
     interact: function(gameState, next)
     {
-	var front = gameState.world.getCharacterInFrontOf(gameState.currChar, 1);
-	if (gameState.interactionScripts[front])
-	{
-	    gameState.interactionScript(gameState.currChar, front, gameState.interactionScripts[front]);
-	}
-	next();
+    	var front = gameState.world.getCharacterInFrontOf(gameState.currChar, 1);
+    	if (gameState.runScripts[front])
+    	{
+    	    gameState.runScript(gameState.runScripts[front], gameState.currChar, front);
+    	}
+	   next();
     },
     
     customAction: function(func)
     {
         return function(gameState, next)
         {
-	    func(gameState.currChar);
+            func(gameState.currChar);
             next();
         }
     },
     
     die: function(gameState, next)
     {
-	gameState.world.removeCharacter(gameState.currChar);
-	gameState.characters[gameState.currChar] = undefined;
-	next();
+    	gameState.world.removeCharacter(gameState.currChar);
+    	gameState.characters[gameState.currChar] = undefined;
+    	next();
+    },
+
+    getCharPos: function(receiverFunction)
+    {
+        return function(gameState, next)
+        {
+            var world = gameState.world;
+            var interactorPos = world.getCharacterPosition(gameState.currChar);
+            receiverFunction(interactorPos.x, interactorPos.y);
+            next();
+        }
+    },
+
+    getCharId: function(receiverFunction)
+    {
+        return function(gameState, next)
+        {
+            receiverFunction(gameState.currChar);
+            next();
+        }
     }
 }
 
@@ -344,51 +389,65 @@ var Interaction =
 {
     faceInteractor: function(gameState, next)
     {
-	var world = gameState.world;
-	var interactorPos = world.getCharacterPosition(gameState.interactor);
-	var interacteePos = world.getCharacterPosition(gameState.interactee);
-	
-	if (interactorPos.x < interacteePos.x) {
-	    world.rotateCharacter(gameState.interactee, 3);
-	}
-	
-	if (interactorPos.x > interacteePos.x) {
-	    world.rotateCharacter(gameState.interactee, 1);
-	}
-	
-	if (interactorPos.y < interacteePos.y) {
-	    world.rotateCharacter(gameState.interactee, 0);
-	}
-	
-	if (interactorPos.y > interacteePos.y) {
-	    world.rotateCharacter(gameState.interactee, 2);
-	}
-	
-	next();
+    	var world = gameState.world;
+    	var interactorPos = world.getCharacterPosition(gameState.currChar);
+    	var interacteePos = world.getCharacterPosition(gameState.interactee);
+    	
+    	if (interactorPos.x < interacteePos.x) {
+    	    world.rotateCharacter(gameState.interactee, 3);
+    	}
+    	
+    	if (interactorPos.x > interacteePos.x) {
+    	    world.rotateCharacter(gameState.interactee, 1);
+    	}
+    	
+    	if (interactorPos.y < interacteePos.y) {
+    	    world.rotateCharacter(gameState.interactee, 0);
+    	}
+    	
+    	if (interactorPos.y > interacteePos.y) {
+    	    world.rotateCharacter(gameState.interactee, 2);
+    	}
+    	
+    	next();
     },
     
+    getInteracteeId: function(receiverFunction)
+    {
+        return function(gameState, next)
+        {
+            receiverFunction(gameState.interactee);
+            next();
+        }
+    },
+
     pauseInteractee: function(gameState, next)
     {
-	gameState.characters[gameState.interactee].charScriptRunning = false;
-	next();
+    	gameState.characters[gameState.interactee].charScriptRunning = false;
+    	next();
     },
     
     resumeInteractee: function(gameState, next)
     {
-	gameState.characters[gameState.interactee].charScriptRunning = true;
-	next();
+    	gameState.characters[gameState.interactee].charScriptRunning = true;
+    	next();
     },
     
     die: function(gameState, next)
     {
-	gameState.world.removeCharacter(gameState.currChar);
-	gameState.characters[gameState.currChar] = undefined;
-	next();
+    	gameState.world.removeCharacter(gameState.currChar);
+    	gameState.characters[gameState.currChar] = undefined;
+    	next();
     }
 };
 
 var Script =
 {
+    nop: function(gameState, next)
+    {
+        next();
+    },
+
     log: function(text)
     {
         return function(gameState, next)
@@ -402,6 +461,88 @@ var Script =
     {
         gameState.repeat = true;
         next();
+    },
+
+    label: function(label)
+    {
+        return label;
+    },
+
+    goto: function(label)
+    {
+        return function(gameState, next)
+        {
+            gameState.goto = label;
+            next();
+        }
+    },
+
+    do: function(someFunction)
+    {
+        return function(gameState, next)
+        {
+            someFunction();
+            next();
+        }
+    },
+
+    doWait: function(someFunction)
+    {
+        return function(gameState, next)
+        {
+            someFunction(next);
+        }
+    },
+
+    gotoif: function(label, predicateFunction)
+    {
+        return function(gameState, next)
+        {
+            if (predicateFunction())
+            {
+                gameState.goto = label;
+            }
+            next();
+        }
+    },
+
+    run: function(times, script)
+    {
+        if (Array.isArray(times))
+        {
+            script = times;
+            times = 1;
+        }
+
+        return function(gameState, next)
+        {
+            var count = 0;
+            var currChar = gameState.currChar;
+            var interactee = gameState.interactee;
+
+            function runTheScript(func)
+            {
+                gameState.runScript(script, currChar, interactee, func);
+            }
+
+            function checkEnd()
+            {
+                count++;
+                if (count >= times)
+                {
+                    next();
+                }
+                else
+                {
+                    setTimeout(function()
+                    {
+                        runTheScript(checkEnd);
+                    }, 0);
+                }
+            }
+
+            runTheScript(checkEnd);
+        }
     },
     
     hideDialog: function(dialog)
@@ -426,25 +567,29 @@ var Script =
     {
         return function(gameState, next)
         {
-	    var prevActions = gameState.input.getActions();
+	        var prevActions = gameState.input.getActions();
+
+            console.log("dd " + text);
+            console.log(prevActions);
             var dialogActions =
             {
                 aActionOnce: function()
                 {
+                    console.log("bb " + text);
+                    console.log(prevActions);
                     dialog.hideNextArrow();
                     gameState.input.setActions(prevActions);
                     next();
                 },
             }
-            
 	    
-	    gameState.input.setActions({});
+	        gameState.input.setActions({});
 	    
             dialog.startWritingText(text, function()
-	    {
-		dialog.showNextArrow();
-		gameState.input.setActions(dialogActions);
-	    });
+    	    {
+        		dialog.showNextArrow();
+        		gameState.input.setActions(dialogActions);
+    	    });
         }
     },
     
@@ -453,7 +598,7 @@ var Script =
         return function(gameState, next)
         {
             var char = gameState.world.addCharacter(charNum, x, y);
-            gameState.characterScript(char, script);
+            gameState.runScript(script, char);
 	        gameState.characters[char] = new GameCharacter(char);
             next();
         }
@@ -473,7 +618,7 @@ var Script =
     {
         return function(gameState, next)
         {
-	    func();
+	       func();
             next();
         }
     }

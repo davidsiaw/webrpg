@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>rpg</title>
+<title>karel</title>
 <meta http-equiv="content-type" content="text/html;charset=utf-8" />
 </head>
 <body>
@@ -232,13 +232,50 @@ function startGame()
 		Character.walkRight,
 		Script.repeat,
 	];
+
+	var collidedThing = 0;
+	var showOuch = 
+	[
+		Interaction.getInteracteeId(function(id) { console.log("id = " + id); collidedThing = id; }),
+		Script.gotoif("end", function() { return collidedThing !== 0; }),
+		Script.showDialog(dialog),
+		Script.speechDialog(dialog, ["Ouch"]),
+		Script.hideDialog(dialog),
+		Script.label("end"),
+	];
+
+	var p = 100;
+
+	var walkUpDown =
+	[
+		Character.setSlow(64),
+
+		Character.assignCollide(showOuch),
+
+		Script.label("start"),
+
+		Script.do(function() { /*console.log("nyan");*/ }),
+
+		Script.run(4,
+		[
+			Character.walkDown,
+			Character.getCharPos(function(x,y) { /*console.log("pos: " + x + " " + y)*/ })
+		]),
+		Script.run(4,
+		[
+			Character.walkUp,
+			Character.getCharPos(function(x,y) { /*console.log("pos: " + x + " " + y)*/ })
+		]),
+
+		Script.gotoif("start", function() { return p == 100; }),
+	];
 	
 	var mainScript =
 	[
 		Script.addCharacter(5,0,0,heroScript),
-		//Script.addCharacter(1,5,5,girlScript),
-		//Script.addCharacter(3,13,13,boyScript),
-		Script.addCharacter(1,5,5,[Character.walkDown]),
+		Script.addCharacter(1,5,5,girlScript),
+		Script.addCharacter(3,13,13,boyScript),
+		Script.addCharacter(5,1,1,walkUpDown),
 		Script.addCharacter(3,6,5,[Character.walkDown]),
 		Script.addCharacter(7,7,5,[Character.walkDown]),
 		Script.addCharacter(4,8,5,[Character.walkDown]),
