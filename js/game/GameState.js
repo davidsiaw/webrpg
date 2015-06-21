@@ -31,14 +31,23 @@ function GameState(input, world, map)
 
     this.collide = function(curr, other, onEnd)
     {
+        var scriptRan = false;
+
         if (self.collisionScript[curr] !== undefined)
         {
             self.runScript(self.collisionScript[curr], curr, other, onEnd);
+            scriptRan = true;
         }
 
         if (self.collisionScript[other] !== undefined)
         {
             self.runScript(self.collisionScript[other], curr, other, onEnd);
+            scriptRan = true;
+        }
+
+        if (!scriptRan)
+        {
+            onEnd();
         }
     }
 
@@ -49,6 +58,8 @@ function GameState(input, world, map)
 
         var strippedScript = [];
         var i=0;
+
+
         for (i=0; i<script.length; i++)
         {
             if (typeof script[i] === "string")
