@@ -40,7 +40,7 @@ function CanvasMapView(x,y,z,w,h,mapModel)
         mapModel.advanceTime(timeBetween);
 
         var millisecond = now.getTime();
-        var tileAnimTick = Math.floor(millisecond / 200);
+        var tileAnimTick = Math.floor(millisecond / 100);
         
         var cameraPos = camera.getLocation();
 	
@@ -110,7 +110,10 @@ function CanvasMapView(x,y,z,w,h,mapModel)
             var left = ((char.x+1/2) * tileSize - char.width/2 - (cameraPos.x) * tileSize) ;
             var top = ((char.y+1) * tileSize - char.height - (cameraPos.y) * tileSize) ;
             
-            context.drawImage(charSetImg,char.offsetx,char.offsety,char.width,char.height,left,top + charShift,char.width,char.height);
+            context.drawImage(
+                charSetImg,
+                char.offsetx,char.offsety,char.width,char.height,
+                left,top + charShift,char.width,char.height);
         }
         
         lastUpdateTime = new Date();

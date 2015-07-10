@@ -221,6 +221,11 @@ function World(tileset, charset, tileinfo, mapinfo)
 
 	this.removeCharacter = function(char) {
 		var c = model.getCharacter(char);
+		if (!c)
+		{
+			console.log("World.removeCharacter: No such char " + char);
+			return;
+		}
 		model.removeCharacter(char);
 		setOccupant(undefined, c.tilex, c.tiley);
 	}

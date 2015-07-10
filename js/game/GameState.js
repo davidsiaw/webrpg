@@ -28,6 +28,7 @@ function GameState(input, world, map)
     this.goto = false;
 
     this.collisionScript = {};
+    this.hitBySomethingScript = {};
 
     this.collide = function(curr, other, onEnd)
     {
@@ -39,9 +40,9 @@ function GameState(input, world, map)
             scriptRan = true;
         }
 
-        if (self.collisionScript[other] !== undefined)
+        if (self.hitBySomethingScript[other] !== undefined)
         {
-            self.runScript(self.collisionScript[other], curr, other, onEnd);
+            self.runScript(self.hitBySomethingScript[other], other, curr, onEnd);
             scriptRan = true;
         }
 
@@ -50,6 +51,7 @@ function GameState(input, world, map)
             onEnd();
         }
     }
+
 
     this.runScript = function(script, interactor, interactee, onEnd)
     {
@@ -191,6 +193,31 @@ var Character =
             gameState.collide(gameState.currChar, other, next);
         });
     },
+
+    turnBackOnInteractor: function(gameState, next)
+    {
+        var world = gameState.world;
+        var interactorPos = world.getCharacterPosition(gameState.currChar);
+        var interacteePos = world.getCharacterPosition(gameState.interactee);
+        
+        if (interactorPos.x < interacteePos.x) {
+            world.rotateCharacter(gameState.currChar, 3);
+        }
+        
+        if (interactorPos.x > interacteePos.x) {
+            world.rotateCharacter(gameState.currChar, 1);
+        }
+        
+        if (interactorPos.y < interacteePos.y) {
+            world.rotateCharacter(gameState.currChar, 0);
+        }
+        
+        if (interactorPos.y > interacteePos.y) {
+            world.rotateCharacter(gameState.currChar, 2);
+        }
+        
+        next();
+    },
     
     spawnCharacterAtFront: function(charNum, script)
     {
@@ -230,9 +257,9 @@ var Character =
         {
             next();
         },
-        function()
+        function(other)
         {
-            next();
+            gameState.collide(gameState.currChar, other, next);
         });
     },
     
@@ -260,23 +287,39 @@ var Character =
     	{
     		this.leftArrowAction = function()
     		{
-    		    gameState.world.moveCharacter(theChar, 3);
-    		    gameState.world.rotateCharacter(theChar, 3);
+                gameState.world.rotateCharacter(theChar, 3);
+    		    gameState.world.moveCharacter(theChar, 3, true, function(){},
+                function(other)
+                {
+                    gameState.collide(theChar, other, function(){});
+                });
     		};
     		this.rightArrowAction = function()
     		{
-    		    gameState.world.moveCharacter(theChar, 1);
-    		    gameState.world.rotateCharacter(theChar, 1);
+                gameState.world.rotateCharacter(theChar, 1);
+    		    gameState.world.moveCharacter(theChar, 1, true, function(){},
+                function(other)
+                {
+                    gameState.collide(theChar, other, function(){});
+                });
     		};
     		this.upArrowAction = function()
     		{
-    		    gameState.world.moveCharacter(theChar, 0);
-    		    gameState.world.rotateCharacter(theChar, 0);
+                gameState.world.rotateCharacter(theChar, 0);
+    		    gameState.world.moveCharacter(theChar, 0, true, function(){},
+                function(other)
+                {
+                    gameState.collide(theChar, other, function(){});
+                });
     		};
     		this.downArrowAction = function()
     		{
-    		    gameState.world.moveCharacter(theChar, 2);
-    		    gameState.world.rotateCharacter(theChar, 2);
+                gameState.world.rotateCharacter(theChar, 2);
+    		    gameState.world.moveCharacter(theChar, 2, true, function(){},
+                function(other)
+                {
+                    gameState.collide(theChar, other, function(){});
+                });
     		};
     	}
     	gameState.input.setActions(new walkAroundActions(gameState.currChar));
@@ -345,6 +388,15 @@ var Character =
         return function(gameState, next)
         {
             gameState.collisionScript[gameState.currChar] = script;
+            next();
+        }
+    },
+
+    assignHitBySomething: function(script)
+    {
+        return function(gameState, next)
+        {
+            gameState.hitBySomethingScript[gameState.currChar] = script;
             next();
         }
     },
@@ -422,6 +474,31 @@ var Interaction =
     	
     	next();
     },
+
+    turnBackOnInteractor: function(gameState, next)
+    {
+        var world = gameState.world;
+        var interactorPos = world.getCharacterPosition(gameState.currChar);
+        var interacteePos = world.getCharacterPosition(gameState.interactee);
+        
+        if (interactorPos.x < interacteePos.x) {
+            world.rotateCharacter(gameState.interactee, 1);
+        }
+        
+        if (interactorPos.x > interacteePos.x) {
+            world.rotateCharacter(gameState.interactee, 3);
+        }
+        
+        if (interactorPos.y < interacteePos.y) {
+            world.rotateCharacter(gameState.interactee, 2);
+        }
+        
+        if (interactorPos.y > interacteePos.y) {
+            world.rotateCharacter(gameState.interactee, 0);
+        }
+        
+        next();
+    },
     
     getInteracteeId: function(receiverFunction)
     {
@@ -436,6 +513,13 @@ var Interaction =
     {
     	gameState.characters[gameState.interactee].charScriptRunning = false;
     	next();
+    },
+
+    killInteractee: function(gameState, next)
+    {
+        gameState.world.removeCharacter(gameState.interactee);
+        gameState.characters[gameState.interactee] = undefined;
+        next();
     },
     
     resumeInteractee: function(gameState, next)
@@ -576,18 +660,16 @@ var Script =
     
     speechDialog: function(dialog, text)
     {
+        var theDialog = dialog;
         return function(gameState, next)
         {
+            dialog.hideHighlightBox();
 	        var prevActions = gameState.input.getActions();
 
-            console.log("dd " + text);
-            console.log(prevActions);
             var dialogActions =
             {
                 aActionOnce: function()
                 {
-                    console.log("bb " + text);
-                    console.log(prevActions);
                     dialog.hideNextArrow();
                     gameState.input.setActions(prevActions);
                     next();
@@ -601,6 +683,98 @@ var Script =
         		dialog.showNextArrow();
         		gameState.input.setActions(dialogActions);
     	    });
+        }
+    },
+
+    simpleSelectDialog: function(dialog, selectionArray, selectedFunc, selectionChangeFunc, cancellable)
+    {
+        var theDialog = dialog;
+        var isCancellable = cancellable;
+        return function(gameState, next)
+        {
+            var prevActions = gameState.input.getActions();
+            var selection = 0;
+
+            var topDisplay = 0;
+
+            function updateText()
+            {
+                if (selection - topDisplay < 0)
+                {
+                    topDisplay = selection;
+                }
+                if (selection - topDisplay > theDialog.getMaxRows()-1)
+                {
+                    topDisplay = selection - (theDialog.getMaxRows()-1);
+                }
+
+                theDialog.setText(selectionArray.slice(topDisplay, topDisplay + theDialog.getMaxRows() ));
+                
+                theDialog.setHighlightBox(theDialog.areaGetRow(selection - topDisplay));
+
+                if (selectionArray.length - topDisplay > theDialog.getMaxRows())
+                {
+                    theDialog.showNextArrow();
+                }
+                else
+                {
+                    theDialog.hideNextArrow();
+                }
+
+                if (selectionChangeFunc)
+                {
+                    selectionChangeFunc(selection);
+                }
+            }
+
+            updateText();
+
+
+            var dialogActions =
+            {
+                aActionOnce: function()
+                {
+                    theDialog.hideNextArrow();
+                    gameState.input.setActions(prevActions);
+                    selectedFunc(selection);
+                    next();
+                },
+
+                upActionMatic: function()
+                {
+                    selection = selection - 1;
+                    if (selection < 0) { selection = selectionArray.length - 1; }
+                    updateText();
+
+                },
+
+                downActionMatic: function()
+                {
+                    selection = (selection + 1) % selectionArray.length;
+                    updateText();
+                }
+            }
+
+            if (isCancellable)
+            {
+                dialogActions.zActionOnce = function()
+                {
+                    gameState.input.setActions(prevActions);
+                    next();
+                }
+            }
+
+            gameState.input.setActions(dialogActions);
+        
+        }
+    },
+
+    getRotation: function(id, receiveRotationFunc)
+    {
+        return function(gameState, next)
+        {
+            receiveRotationFunc(gameState.world.getCharacterRotation(id));
+            next();
         }
     },
     
