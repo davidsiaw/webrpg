@@ -107,25 +107,49 @@ function Map(w,h)
 	return this;
 }
 
+// TODO: make proper loader
 
-var charImg = new Image();
-var tilesetImg = new Image();
 
-charImg.src = "res/output.png";
-charImg.onload = function ()
+function loadImages(imageArray, onComplete)
 {
-	tilesetImg.src = "res/grass.png";
-	tilesetImg.onload = function()
+	var loadedImages = [];
+
+	function loadNextImage()
 	{
-		startGame();
+		if (loadedImages.length == imageArray.length)
+		{
+			onComplete(loadedImages);
+		}
+		else
+		{
+			var theImage = new Image();
+			theImage.src = imageArray[loadedImages.length];
+			theImage.onload = function()
+			{
+				loadNextImage();
+			}
+			loadedImages.push(theImage);
+		}
 	}
+
+	loadNextImage();
 }
 
-function startGame()
+
+loadImages(["res/output.png", "res/transparent.png", "res/backgroundpng.png"], 
+	function(loadedImages)
+	{
+		charImg = loadedImages[0];
+		tilesetImg = loadedImages[1];
+		backgroundImg = loadedImages[2];
+		startGame();
+	});
+
+
+function startScene(parent,map,script)
 {
-	var mapInfo = new Map(100,100);
 	var input = new SimpleInput();
-	var world = new World(tilesetImg, charImg, tileInfo, mapInfo);
+	var world = new World(tilesetImg, charImg, backgroundImg, tileInfo, map);
 	
 	var map = new CanvasMapView(10, 10, 0, 640,480, world.getModel());
 
@@ -137,18 +161,22 @@ function startGame()
 	controlleft.modeLeftDialog();
 	controlright.modeRightDialog();
 	statusDialog.modeStatusDialog();
-	
-	document.body.appendChild(controlleft.getDiv());
-	document.body.appendChild(controlright.getDiv());
-	document.body.appendChild(statusDialog.getDiv());
-	document.body.appendChild(dialog.getDiv());
-	document.body.appendChild(map.getDiv());
-	
+
+	var mapDisplay = document.createElement('div');
+
+	mapDisplay.appendChild(controlleft.getDiv());
+	mapDisplay.appendChild(controlright.getDiv());
+	mapDisplay.appendChild(statusDialog.getDiv());
+	mapDisplay.appendChild(dialog.getDiv());
+	mapDisplay.appendChild(map.getDiv());
+
+	parent.appendChild(mapDisplay);
+
 	var gameState = new GameState(input, world, map);
 	
 	var lastUpdateTime = new Date();
 
-	setInterval(function()
+	var interval = setInterval(function()
 	{
 	    var timeBetween = new Date() - lastUpdateTime;
 	    if (timeBetween > 200)
@@ -167,6 +195,46 @@ function startGame()
 
 		
 	}, 16)
+
+	gameState.dialogs["BOTTOM"] = dialog;
+	gameState.dialogs["LEFT"] = controlleft;
+	gameState.dialogs["RIGHT"] = controlright;
+	gameState.dialogs["STATUS"] = statusDialog;
+
+	gameState.runScript(script);
+
+	return {
+		interval: interval,
+		gameState: gameState,
+		mapDisplay: mapDisplay,
+		parent: parent
+	};
+}
+
+function stopScene(scene)
+{
+	clearInterval(scene.interval);
+	scene.gameState.stop();
+	scene.parent.removeChild(scene.mapDisplay);
+}
+
+
+
+function startGame()
+{
+	firstmap();
+}
+
+function secondmap()
+{
+}
+
+
+function firstmap()
+{
+	var mapInfo = new Map(20,20);
+
+	var gameState;
 	
 	var setTile =
 	[
@@ -222,22 +290,24 @@ function startGame()
 
 	var showControls =
 	[
-		Script.showDialog(controlright),
-		Script.showDialog(controlleft),
-		Script.showDialog(statusDialog),
-		Script.simpleSelectDialog(controlleft, controlMenu.map(function(x){ return x.name; }), 
+		Script.showDialog("RIGHT"),
+		Script.showDialog("LEFT"),
+		Script.showDialog("STATUS"),
+		Script.simpleSelectDialog("LEFT", controlMenu.map(function(x){ return x.name; }), 
 			function(sel)
 			{
 
 			}, 
 			function(cursel)
 			{
-				statusDialog.setText(controlMenu[cursel].desc);
-			}, true),
+				gameState.runScript([Script.setDialogText("STATUS", [controlMenu[cursel].desc])])
+			},
+			true
+		),
 
-		Script.hideDialog(statusDialog),
-		Script.hideDialog(controlleft),
-		Script.hideDialog(controlright),
+		Script.hideDialog("STATUS"),
+		Script.hideDialog("LEFT"),
+		Script.hideDialog("RIGHT"),
 	];
 	
 	var heroScript =
@@ -255,11 +325,11 @@ function startGame()
 	[
 		Interaction.pauseInteractee,
 		Interaction.faceInteractor,
-		Script.showDialog(dialog),
-		Script.speechDialog(dialog, ["宇宙からの愛のエネルギーを", "胸が痛いほどに感じています"]),
-		Script.simpleSelectDialog(dialog, ["Kagami", "Tsukasa", "Konata", "Miyuki", "Kusakabe", "Hiyori"], 
+		Script.showDialog("BOTTOM"),
+		Script.speechDialog("BOTTOM", ["宇宙からの愛のエネルギーを", "胸が痛いほどに感じています"]),
+		Script.simpleSelectDialog("BOTTOM", ["Kagami", "Tsukasa", "Konata", "Miyuki", "Kusakabe", "Hiyori"], 
 			function(sel){}),
-		Script.hideDialog(dialog),
+		Script.hideDialog("BOTTOM"),
 		Interaction.resumeInteractee
 	];
 	
@@ -296,9 +366,9 @@ function startGame()
 			collidedThing = id; 
 		}),
 		Script.gotoif("end", function() { return collidedThing !== 0; }),
-		Script.showDialog(dialog),
-		Script.speechDialog(dialog, ["Ouch"]),
-		Script.hideDialog(dialog),
+		Script.showDialog("BOTTOM"),
+		Script.speechDialog("BOTTOM", ["Ouch"]),
+		Script.hideDialog("BOTTOM"),
 		Script.label("end"),
 	];
 
@@ -343,33 +413,36 @@ function startGame()
 
 	var mainScript =
 	[
-		Script.hideDialog(dialog),
-		Script.hideDialog(statusDialog),
-		Script.hideDialog(controlleft),
-		Script.hideDialog(controlright),
+		Script.customAction(function(theGameState) { gameState = theGameState; }),
 
-		Script.addCharacter(5,0,0,heroScript),
-		Script.addCharacter(1,5,5,girlScript),
-		Script.addCharacter(3,13,13,boyScript),
-		Script.addCharacter(5,1,1,walkUpDown),
-		Script.addCharacter(3,6,5,[Character.walkDown]),
-		Script.addCharacter(7,7,5,[Character.walkDown]),
-		Script.addCharacter(4,8,5,[Character.walkDown]),
-		Script.addCharacter(9,10,10,boxScript),
-		Script.addCharacter(9,11,10,boxScript),
-		Script.addCharacter(9,12,10,boxScript),
-		Script.addCharacter(9,13,10,boxScript),
-		Script.addCharacter(9,14,10,boxScript),
-		Script.addCharacter(9,15,10,boxScript),
-		Script.addCharacter(9,16,10,boxScript),
+		Script.hideDialog("BOTTOM"),
+		Script.hideDialog("STATUS"),
+		Script.hideDialog("LEFT"),
+		Script.hideDialog("RIGHT"),
+
+		Script.addCharacter(5,0,0,-16,heroScript),
+		Script.addCharacter(1,5,5,-16,girlScript),
+		Script.addCharacter(3,13,13,-16,boyScript),
+		Script.addCharacter(5,1,1,-16,walkUpDown),
+		Script.addCharacter(3,6,5,-16,[Character.walkDown]),
+		Script.addCharacter(7,7,5,-16,[Character.walkDown]),
+		Script.addCharacter(4,8,5,-16,[Character.walkDown]),
+		Script.addCharacter(9,10,10,0,boxScript),
+		Script.addCharacter(9,11,10,0,boxScript),
+		Script.addCharacter(9,12,10,0,boxScript),
+		Script.addCharacter(9,13,10,0,boxScript),
+		Script.addCharacter(9,14,10,0,boxScript),
+		Script.addCharacter(10,15,10,0,boxScript),
+		Script.addCharacter(10,16,10,0,boxScript),
+		Script.addCharacter(10,17,10,0,boxScript),
+		Script.addCharacter(0,18,10,-16,boxScript),
 		//Script.showDialog(dialog),
 		//Script.speechDialog(dialog, ["Sie sind das Essen und we sind die Jager", "", "This is the world"]),
 		//Script.speechDialog(dialog, ["She was very nervous"]),
 
 	];
 
-	
-	gameState.runScript(mainScript);
+	startScene(document.body, mapInfo, mainScript);
 
 }
 

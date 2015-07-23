@@ -3,7 +3,7 @@ var Passable = {
 	Air: 0x2,
 }
 
-function World(tileset, charset, tileinfo, mapinfo)
+function World(tileset, charset, background, tileinfo, mapinfo)
 {
 	var w = mapinfo.width;
 	var h = mapinfo.height;
@@ -73,6 +73,7 @@ function World(tileset, charset, tileinfo, mapinfo)
 	
 	function prerender()
 	{
+		prerenderedMap["background"] = background;
 		for (var x = 0; x < w; x++)
 		{
 			for (var y = 0; y < h; y++)
@@ -210,11 +211,11 @@ function World(tileset, charset, tileinfo, mapinfo)
 	    return model;
 	}
 
-    this.addCharacter = function(type,x,y)
+    this.addCharacter = function(type,x,y,shift)
     {
-        var char = model.addCharacter(type,x,y);
+        var char = model.addCharacter(type,x,y,shift);
         var c = model.getCharacter(char);
-    c.mobility = Passable.Ground;
+    	c.mobility = Passable.Ground;
         setOccupant(char, c.tilex, c.tiley); 
         return char;
     }

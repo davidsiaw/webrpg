@@ -15,7 +15,7 @@ function CanvasMapView(x,y,z,w,h,mapModel)
     canvas.style.top = y+"px";
     canvas.style.zIndex = z;
 
-    var charShift = -16;
+    var charShift = 0;
 
     var tilesPerWidth = w / tileSize + 2;
     var tilesPerHeight = h / tileSize + 2;
@@ -55,11 +55,32 @@ function CanvasMapView(x,y,z,w,h,mapModel)
         		
         		var top = ((y - biasedFracY) * tileSize);
         		var left = ((x - biasedFracX) * tileSize);
-        		
+
+                var srcLeft = (left + prerenderedMap["background"].width + cameraPos.x * (tileSize) ) % prerenderedMap["background"].width;
+                var srcTop = (top + prerenderedMap["background"].height + cameraPos.y * (tileSize) ) % prerenderedMap["background"].height;
+
+                if (prerenderedMap["background"] && srcLeft >= 0 && srcTop >= 0)
+                {
+                    context.drawImage(
+                        prerenderedMap["background"],
+                        srcLeft,
+                        srcTop,
+                        tileSize,
+                        tileSize,
+                        left,
+                        top,
+                        tileSize,
+                        tileSize
+                    )
+                }
+                else
+                {
+                    context.fillStyle = "#000";
+                    context.fillRect(left, top, tileSize, tileSize);
+                }
+
         		if (!texcoord)
         		{
-        		    context.fillStyle = "#000";
-        		    context.fillRect(left, top, tileSize, tileSize);
         		}
         		else
         		{
@@ -113,7 +134,7 @@ function CanvasMapView(x,y,z,w,h,mapModel)
             context.drawImage(
                 charSetImg,
                 char.offsetx,char.offsety,char.width,char.height,
-                left,top + charShift,char.width,char.height);
+                left,top + char.charShift,char.width,char.height);
         }
         
         lastUpdateTime = new Date();

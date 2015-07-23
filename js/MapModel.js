@@ -157,8 +157,9 @@ function MapModel(prerenderedMap, charset, tileSize, mapfunc)
 	
 	}
 	
-	this.addCharacter = function(typeid,x,y)
+	this.addCharacter = function(typeid,x,y,charShift)
 	{
+		charShift = charShift || 0;
 		characters.push(
 			{
 				id: characters.length,
@@ -174,7 +175,8 @@ function MapModel(prerenderedMap, charset, tileSize, mapfunc)
 				dx: 0,
 				dy: 0,
 				direction: 0,
-				slowness: 16
+				slowness: 16,
+				charShift: charShift
 			}
 		);
 		return characters.length - 1;

@@ -19,6 +19,7 @@ function GameState(input, world, map)
     this.characters = {};
     
     this.runScripts = {};
+    this.dialogs = {};
     
     this.currChar = undefined;
     
@@ -27,8 +28,15 @@ function GameState(input, world, map)
     this.label = false;
     this.goto = false;
 
+    var running = true;
+
     this.collisionScript = {};
     this.hitBySomethingScript = {};
+
+    this.stop = function()
+    {
+        running = false;
+    }
 
     this.collide = function(curr, other, onEnd)
     {
@@ -51,7 +59,6 @@ function GameState(input, world, map)
             onEnd();
         }
     }
-
 
     this.runScript = function(script, interactor, interactee, onEnd)
     {
@@ -79,6 +86,11 @@ function GameState(input, world, map)
 
         function invoke()
 	    {
+            if (!running)
+            {
+                return;
+            }
+
             if (self.label)
             {
                 labels[self.label] = cur;
@@ -609,6 +621,9 @@ var Script =
             times = 1;
         }
 
+        var theScript = script;
+        var numTimes = times;
+
         return function(gameState, next)
         {
             var count = 0;
@@ -617,13 +632,13 @@ var Script =
 
             function runTheScript(func)
             {
-                gameState.runScript(script, currChar, interactee, func);
+                gameState.runScript(theScript, currChar, interactee, func);
             }
 
             function checkEnd()
             {
                 count++;
-                if (count >= times)
+                if (count >= numTimes)
                 {
                     next();
                 }
@@ -642,35 +657,52 @@ var Script =
     
     hideDialog: function(dialog)
     {
+        var dialogName = dialog;
         return function(gameState, next)
         {
-            dialog.hide();
+            var theDialog = gameState.dialogs[dialogName];
+            theDialog.hide();
             next();
         }
     },
     
     showDialog: function(dialog)
     {
+        var dialogName = dialog;
         return function(gameState, next)
         {
-            dialog.show();
+            var theDialog = gameState.dialogs[dialogName];
+            theDialog.show();
+            next();
+        }
+    },
+
+    setDialogText: function(dialog, text)
+    {
+        var dialogName = dialog;
+        var theText = text;
+        return function(gameState, next)
+        {
+            var theDialog = gameState.dialogs[dialogName];
+            theDialog.setText(theText);
             next();
         }
     },
     
     speechDialog: function(dialog, text)
     {
-        var theDialog = dialog;
+        var dialogName = dialog;
         return function(gameState, next)
         {
-            dialog.hideHighlightBox();
+            var theDialog = gameState.dialogs[dialogName];
+            theDialog.hideHighlightBox();
 	        var prevActions = gameState.input.getActions();
 
             var dialogActions =
             {
                 aActionOnce: function()
                 {
-                    dialog.hideNextArrow();
+                    theDialog.hideNextArrow();
                     gameState.input.setActions(prevActions);
                     next();
                 },
@@ -678,9 +710,9 @@ var Script =
 	    
 	        gameState.input.setActions({});
 	    
-            dialog.startWritingText(text, function()
+            theDialog.startWritingText(text, function()
     	    {
-        		dialog.showNextArrow();
+        		theDialog.showNextArrow();
         		gameState.input.setActions(dialogActions);
     	    });
         }
@@ -688,10 +720,11 @@ var Script =
 
     simpleSelectDialog: function(dialog, selectionArray, selectedFunc, selectionChangeFunc, cancellable)
     {
-        var theDialog = dialog;
+        var dialogName = dialog;
         var isCancellable = cancellable;
         return function(gameState, next)
         {
+            var theDialog = gameState.dialogs[dialogName];
             var prevActions = gameState.input.getActions();
             var selection = 0;
 
@@ -778,11 +811,11 @@ var Script =
         }
     },
     
-    addCharacter: function(charNum, x, y, script)
+    addCharacter: function(charNum, x, y, shift, script)
     {
         return function(gameState, next)
         {
-            var char = gameState.world.addCharacter(charNum, x, y);
+            var char = gameState.world.addCharacter(charNum, x, y, shift);
             gameState.runScript(script, char);
 	        gameState.characters[char] = new GameCharacter(char);
             next();
@@ -803,7 +836,7 @@ var Script =
     {
         return function(gameState, next)
         {
-	       func();
+            func(gameState);
             next();
         }
     }
