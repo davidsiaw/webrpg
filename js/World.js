@@ -26,6 +26,7 @@ function World(tileset, charset, background, tileinfo, mapinfo)
 	];
 	
 	var prerenderedMap = {};
+	var animations = {};
 	
 	function isTileSame(tileid, mapinfo, x, y)
     {
@@ -84,17 +85,6 @@ function World(tileset, charset, background, tileinfo, mapinfo)
 				var surrounding = surroundings(mapinfo, x, y);
 				if (tile.type === "simple")
 				{
-					/*context.drawImage(
-							  tileset,
-							  tile.coords[0].x,
-							  tile.coords[0].y,
-							  tileSize,
-							  tileSize,
-							  
-							  x*tileSize,
-							  y*tileSize,
-							  tileSize,
-							  tileSize);*/
 					prerenderedMap[":" + x + "," + y] = {
 						tileSet: tileset,
 						parts: [ { coords: tile.coords, dx: 0, dy: 0, size: tileSize} ]
@@ -142,7 +132,7 @@ function World(tileset, charset, background, tileinfo, mapinfo)
 	
     var positions = {};
     var tiles = {};
-	var model = new MapModel(prerenderedMap, charset, tileSize, function(x,y)
+	var model = new MapModel(prerenderedMap, animations, charset, tileSize, function(x,y)
 	{
 		x = Math.floor(x);
 		y = Math.floor(y);
@@ -254,7 +244,7 @@ function World(tileset, charset, background, tileinfo, mapinfo)
 	this.getCharacterPosition = function(number)
 	{
 		var char = model.getCharacter(number);
-		return { x: char.tilex, y: char.tiley };
+		return { x: char.tilex, y: char.tiley, shift: char.charShift };
 	}
 	
 	this.rerenderWorld = function()
@@ -290,6 +280,35 @@ function World(tileset, charset, background, tileinfo, mapinfo)
 			tile = model.getFrontTile(number, distance);
 		}
 		return getOccupant(tile.x, tile.y);
+	}
+
+	this.getAnimation = function(name)
+	{
+		return animations[name];
+	}
+
+	this.addAnimation = function(name, image, tilewidth, tileheight)
+	{
+		var rows = Math.floor(image.width / tilewidth);
+		var cols = Math.floor(image.height / tileheight);
+		var i = 0, j = 0;
+		var animcoords = [];
+
+		for (i=0; i<rows; i++)
+		{
+			for (j=0; j<cols; j++)
+			{
+				animcoords.push({x: j, y: i});
+			}
+		}
+
+		animations[name] = {
+			image: image,
+			tilewidth: tilewidth,
+			tileheight: tileheight,
+			animcoords: animcoords,
+			frameDelay: 50
+		}
 	}
 	
 	return this;

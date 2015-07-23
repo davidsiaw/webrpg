@@ -145,7 +145,7 @@ function GameState(input, world, map)
                     setTimeout(function()
                     {
                         resume();
-                    }, 100);
+                    }, 0);
                 }
             }
             
@@ -231,7 +231,7 @@ var Character =
         next();
     },
     
-    spawnCharacterAtFront: function(charNum, script)
+    spawnCharacterAtFront: function(charNum, shift, script)
     {
         return function(gameState, next)
     	{
@@ -239,7 +239,7 @@ var Character =
     	    {
         		var front = gameState.world.getFrontOf(gameState.currChar);
         	    
-        		var char = gameState.world.addCharacter(charNum, front.x, front.y);
+        		var char = gameState.world.addCharacter(charNum, front.x, front.y, shift);
         		gameState.world.rotateCharacter(char, gameState.world.getCharacterRotation(gameState.currChar));
         		gameState.runScript(script, char);
         		
@@ -264,15 +264,23 @@ var Character =
     
     walkForward: function(gameState, next)
     {
-        gameState.world.moveCharacter(gameState.currChar,
-	    gameState.world.getCharacterRotation(gameState.currChar), true, function()
+        if (gameState.world.getModel().getCharacter(gameState.currChar))
         {
+            gameState.world.moveCharacter(gameState.currChar,
+            gameState.world.getCharacterRotation(gameState.currChar), true, function()
+            {
+                next();
+            },
+            function(other)
+            {
+                gameState.collide(gameState.currChar, other, next);
+            });
+        }
+        else
+        {
+            console.log("walkForward: No such char")
             next();
-        },
-        function(other)
-        {
-            gameState.collide(gameState.currChar, other, next);
-        });
+        }
     },
     
     setSlow: function(slowness)
@@ -457,7 +465,18 @@ var Character =
             receiverFunction(gameState.currChar);
             next();
         }
-    }
+    },
+
+    addAnimation: function(name)
+    {
+        var thename = name;
+        return function(gameState, next)
+        {
+            var charpos = gameState.world.getCharacterPosition(gameState.currChar);
+            gameState.world.getModel().addAnimation(thename,charpos.x,charpos.y,charpos.shift);
+            next();
+        }
+    },
 }
 
 var Interaction =
@@ -545,7 +564,26 @@ var Interaction =
     	gameState.world.removeCharacter(gameState.currChar);
     	gameState.characters[gameState.currChar] = undefined;
     	next();
-    }
+    },
+
+    addAnimationOnInteractee: function(name)
+    {
+        var thename = name;
+        return function(gameState, next)
+        {
+            if (gameState.interactee)
+            {
+                var charpos = gameState.world.getCharacterPosition(gameState.interactee);
+                gameState.world.getModel().addAnimation(thename,charpos.x,charpos.y,charpos.shift);
+                next();
+            }
+            else
+            {
+                console.log("addAnimationOnInteractee: Warning, no such interactee");
+                next();
+            }
+        }
+    },
 };
 
 var Script =
@@ -828,6 +866,17 @@ var Script =
         {
             gameState.world.removeCharacter(charNum);
 	        gameState.characters[charNum] = undefined;
+            next();
+        }
+    },
+
+    addAnimation: function(name, x, y)
+    {
+        var thename = name;
+        var thex = x, they = y;
+        return function(gameState, next)
+        {
+            gameState.world.getModel().addAnimation(thename,thex,they);
             next();
         }
     },

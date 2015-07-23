@@ -136,12 +136,20 @@ function loadImages(imageArray, onComplete)
 }
 
 
-loadImages(["res/output.png", "res/transparent.png", "res/backgroundpng.png"], 
+loadImages([
+	"res/output.png", 
+	"res/transparent.png", 
+	"res/backgroundpng.png", 
+	"res/wings_anim.png",
+	"res/explode_anim.png"
+	], 
 	function(loadedImages)
 	{
 		charImg = loadedImages[0];
 		tilesetImg = loadedImages[1];
 		backgroundImg = loadedImages[2];
+		wingsAnim = loadedImages[3];
+		explodeAnim = loadedImages[4];
 		startGame();
 	});
 
@@ -150,6 +158,9 @@ function startScene(parent,map,script)
 {
 	var input = new SimpleInput();
 	var world = new World(tilesetImg, charImg, backgroundImg, tileInfo, map);
+
+	world.addAnimation("wings", wingsAnim, 192, 192);
+	world.addAnimation("explode", explodeAnim, 64, 64);
 	
 	var map = new CanvasMapView(10, 10, 0, 640,480, world.getModel());
 
@@ -258,15 +269,16 @@ function firstmap()
 	
 	var killPersonScript =
 	[
+		Interaction.addAnimationOnInteractee("explode"),
 		Interaction.killInteractee,
 		Character.die
 	];
 
 	var fireballScript =
 	[
-		Character.setIsFlying,
-		Character.setSlow(8),
 		Character.assignCollide(killPersonScript),
+		Character.setSlow(8),
+		Character.setIsFlying,
 		Character.walkForward,
 		Character.walkForward,
 		Character.walkForward,
@@ -316,9 +328,9 @@ function firstmap()
 		Character.assignDirectionalControl,
 		Character.assignCollide([]),
 		Character.assignZ(showControls),
-		//Character.assignX(clearTile),
+		//Character.assignX([Character.addAnimation("wings")]),
 		Character.assignA([Character.interact]),
-		Character.assignS([Character.spawnCharacterAtFront(2,fireballScript)])
+		Character.assignS([Character.spawnCharacterAtFront(2,-16,fireballScript)])
 	];
 	
 	var boyTalkedToScript =

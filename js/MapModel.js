@@ -1,4 +1,4 @@
-function MapModel(prerenderedMap, charset, tileSize, mapfunc)
+function MapModel(prerenderedMap, animations, charset, tileSize, mapfunc)
 {
 	// constants
 	var self = this;
@@ -25,6 +25,7 @@ function MapModel(prerenderedMap, charset, tileSize, mapfunc)
 	
 	var animOffset = 0;
 	var characters = [];
+	var runningAnimations = {};
 	var canMoveTo = function (c,x,y) { return true; }
 	var moveTo = function (c,x,y) { return true; }
 	var getOccupant = function (x,y) { return undefined; }
@@ -156,6 +157,28 @@ function MapModel(prerenderedMap, charset, tileSize, mapfunc)
 		return characters;
 	
 	}
+
+	this.getRunningAnimations = function()
+	{
+		return runningAnimations;
+	}
+
+	this.addAnimation = function(name,x,y,shift)
+	{
+		shift = shift || 0;
+
+		var key = ":" + x + "," + y;
+		if (!runningAnimations[key])
+		{
+			runningAnimations[key] = [];
+		}
+
+		runningAnimations[key].push({
+			anim: animations[name],
+			start: new Date(),
+			shift: shift
+		});
+	}
 	
 	this.addCharacter = function(typeid,x,y,charShift)
 	{
@@ -181,6 +204,7 @@ function MapModel(prerenderedMap, charset, tileSize, mapfunc)
 		);
 		return characters.length - 1;
 	}
+
 	
 	this.removeCharacter = function(char)
 	{

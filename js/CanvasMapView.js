@@ -43,6 +43,8 @@ function CanvasMapView(x,y,z,w,h,mapModel)
         var tileAnimTick = Math.floor(millisecond / 100);
         
         var cameraPos = camera.getLocation();
+
+        var animations = mapModel.getRunningAnimations();
 	
         for (var y = 0; y < tilesPerHeight; y++)
         {
@@ -79,12 +81,12 @@ function CanvasMapView(x,y,z,w,h,mapModel)
                     context.fillRect(left, top, tileSize, tileSize);
                 }
 
-        		if (!texcoord)
+                var coordkey = ":" + Math.floor(cameraPos.x + x) + "," + Math.floor(cameraPos.y + y);
+
+
+        		if (texcoord)
         		{
-        		}
-        		else
-        		{
-                    var item = prerenderedMap[":" + Math.floor(cameraPos.x + x) + "," + Math.floor(cameraPos.y + y)];
+                    var item = prerenderedMap[coordkey];
                     if (item) 
                     {
                         for (var i=0; i<item.parts.length; i++)
@@ -102,17 +104,6 @@ function CanvasMapView(x,y,z,w,h,mapModel)
                                       item.parts[i].size);
                         }
                     }
-
-        		    /*context.drawImage(
-        				      tileSetImg,
-        				      texcoord.x,
-        				      texcoord.y,
-        				      tileSize,
-        				      tileSize,
-        				      left,
-        				      top,
-        				      tileSize,
-        				      tileSize);*/
         		}
             }
         }
@@ -135,6 +126,71 @@ function CanvasMapView(x,y,z,w,h,mapModel)
                 charSetImg,
                 char.offsetx,char.offsety,char.width,char.height,
                 left,top + char.charShift,char.width,char.height);
+        }
+
+
+        for (var y = 0; y < tilesPerHeight; y++)
+        {
+            for (var x = 0; x < tilesPerWidth; x++)
+            {
+                var texcoord = mapModel.getTileOffset(cameraPos.x+x,cameraPos.y+y);
+                
+                var biasedFracY = (cameraPos.y + tileSize * h) % 1;
+                var biasedFracX = (cameraPos.x + tileSize * w) % 1;
+                
+                var top = ((y - biasedFracY) * tileSize);
+                var left = ((x - biasedFracX) * tileSize);
+
+                var srcLeft = (left + prerenderedMap["background"].width + cameraPos.x * (tileSize) ) % prerenderedMap["background"].width;
+                var srcTop = (top + prerenderedMap["background"].height + cameraPos.y * (tileSize) ) % prerenderedMap["background"].height;
+
+                var coordkey = ":" + Math.floor(cameraPos.x + x) + "," + Math.floor(cameraPos.y + y);
+
+
+                if (animations[coordkey] && animations[coordkey].length)
+                {
+                    var i=0;
+                    for (i=0; i<animations[coordkey].length; i++)
+                    {
+                        var anim = animations[coordkey][i];
+                        var elapsedMilliseconds = now.getTime() - anim.start.getTime();
+                        var frame = Math.floor(elapsedMilliseconds / anim.anim.frameDelay);
+
+                        var animposx = left - anim.anim.tilewidth / 2 + tileSize / 2;
+                        var animposy = top - anim.anim.tileheight + tileSize ;
+                        if (frame < anim.anim.animcoords.length)
+                        {
+                            context.drawImage(
+                                anim.anim.image,
+                                anim.anim.animcoords[frame].x * anim.anim.tilewidth,
+                                anim.anim.animcoords[frame].y * anim.anim.tileheight,
+                                anim.anim.tilewidth,
+                                anim.anim.tileheight,
+                                animposx,
+                                animposy + anim.shift,
+                                anim.anim.tilewidth,
+                                anim.anim.tileheight
+                            );
+                        }
+                        else
+                        {
+                            animations[coordkey][i] = null;
+                        }
+                    }
+
+                    // remove nil animations
+                    var anims = [];
+                    var i=0;
+                    for (i=0; i<animations[coordkey].length; i++)
+                    {
+                        if (animations[coordkey][i])
+                        {
+                            anims.push(animations[coordkey][i]);
+                        }
+                    }
+                    animations[coordkey] = anims;
+                }
+            }
         }
         
         lastUpdateTime = new Date();
